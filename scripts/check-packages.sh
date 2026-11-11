@@ -22,7 +22,9 @@ missing=0
 for list in "$@"; do
     while read -r pkg; do
         [ -z "$pkg" ] && continue
-        if ! apt-cache "${APT_OPTS[@]}" show "$pkg" >/dev/null 2>&1; then
+        # A real package has an installable candidate (virtual or removed ones show "(none)")
+        cand=$(apt-cache "${APT_OPTS[@]}" policy "$pkg" 2>/dev/null | awk '/Candidate:/ {print $2}')
+        if [ -z "$cand" ] || [ "$cand" = "(none)" ]; then
             echo "::warning::package '$pkg' is not in Debian $SUITE: removed from $(basename "$list")"
             sed -i "s/^${pkg}\$/# (not in $SUITE) ${pkg}/" "$list"
             missing=$((missing + 1))

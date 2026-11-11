@@ -25,7 +25,7 @@ A Debian-based Linux desktop that tunes itself to the machine it runs on, from a
 | **Files** | Thunar file manager, archive support (zip, 7z, tar), USB drives, Trash |
 | **Terminal** | xfce4-terminal with a Claudius colour scheme, a custom prompt, a system card at startup, and the `claudius` helper command |
 | **Python** | Python 3 with pip, venv, pipx, tkinter, numpy, requests, IPython, IDLE and the **Thonny** IDE. Double-click a `.py` file to open it, right-click → **Run with Python** to run it, example scripts in `~/Python` |
-| **Ubuntu-style** | Switch to a **top bar + left dock** layout with the **Yaru** theme (`claudius layout ubuntu`), **ufw firewall** on by default, **automatic security updates**, **command-not-found** suggestions, **Software & Updates**, **GNOME Disks**, coloured `apt` with a progress bar, and **Flatpak + Flathub** |
+| **Ubuntu-style** | Switch to a **top bar + left dock** layout with the **Yaru** theme (`claudius layout ubuntu`), **ufw firewall** on by default, **automatic security updates**, **command-not-found** suggestions, **GNOME Disks**, coloured `apt` with a progress bar, and **Flatpak + Flathub** |
 | **Apps** | The whole Debian archive: `claudius install <app>`, Synaptic, or Flathub apps with `claudius flatpak <id>` |
 | **Installer** | Calamares. Click **Install Claudius** on the desktop to install it to disk (BIOS or UEFI) |
 | **Welcome** | A welcome app with one-click shortcuts and tips |
