@@ -44,9 +44,14 @@ login_and_explore() {  # login_and_explore <prefix> <with firefox: yes/no>
     pause 8
     ctl type "claudius ram\n"
     pause 4;   shot "$p-4-terminal"
+    ctl type "clear; python3 ~/Python/numbers_demo.py && python3 ~/Python/system_info.py\n"
+    pause 6;   shot "$p-5-python"
     if [ "$2" = yes ]; then
         ctl type "firefox-esr &\n"
-        pause 40; shot "$p-5-firefox"
+        pause 40; shot "$p-6-firefox"
+    else
+        ctl type "claudius layout ubuntu\n"
+        pause 14; shot "$p-6-ubuntu-layout"
     fi
 }
 

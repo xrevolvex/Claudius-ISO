@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+<action>
+	<icon>utilities-terminal</icon>
+	<name>Open Terminal Here</name>
+	<submenu></submenu>
+	<unique-id>claudius-open-terminal</unique-id>
+	<command>exo-open --working-directory %f --launch TerminalEmulator</command>
+	<description>Open a terminal in this folder</description>
+	<range></range>
+	<patterns>*</patterns>
+	<startup-notify/>
+	<directories/>
+</action>
+<action>
+	<icon>text-x-python</icon>
+	<name>Run with Python</name>
+	<submenu></submenu>
+	<unique-id>claudius-run-python</unique-id>
+	<command>claudius-run-python %f</command>
+	<description>Run this script in a terminal</description>
+	<range>*</range>
+	<patterns>*.py;*.pyw</patterns>
+	<text-files/>
+	<other-files/>
+</action>
+<action>
+	<icon>thonny</icon>
+	<name>Edit in Thonny</name>
+	<submenu></submenu>
+	<unique-id>claudius-edit-thonny</unique-id>
+	<command>thonny %F</command>
+	<description>Open in the Thonny Python editor</description>
+	<range>*</range>
+	<patterns>*.py;*.pyw</patterns>
+	<text-files/>
+	<other-files/>
+</action>
+<action>
+	<icon>folder-new</icon>
+	<name>New Python project here</name>
+	<submenu></submenu>
+	<unique-id>claudius-new-python-project</unique-id>
+	<command>claudius-run-python /usr/share/claudius/python/new_project.py %f</command>
+	<description>Create a folder with a virtual environment and a starter script</description>
+	<range></range>
+	<patterns>*</patterns>
+	<directories/>
+</action>
+</actions>

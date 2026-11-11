@@ -1,0 +1,29 @@
+#!/bin/bash
+# Run a Python script in a terminal window that stays open afterwards.
+# Used by the file manager's "Run with Python" action and by double-click.
+#   claudius-run-python script.py [args...]
+if [ -z "${1:-}" ]; then
+    echo "usage: claudius-run-python <script.py> [args...]"; exit 1
+fi
+SCRIPT="$(readlink -f "$1")"; shift
+DIR="$(dirname "$SCRIPT")"
+
+if [ -n "${CLAUDIUS_IN_TERMINAL:-}" ] || [ -t 1 ]; then
+    cd "$DIR" || exit 1
+    # Use the folder's virtual environment if there is one
+    PY=python3
+    for v in .venv venv env; do [ -x "$DIR/$v/bin/python" ] && { PY="$DIR/$v/bin/python"; break; }; done
+    printf '\e[38;5;215m▶ %s %s\e[0m\n\n' "$(basename "$PY")" "$(basename "$SCRIPT")"
+    "$PY" "$SCRIPT" "$@"
+    rc=$?
+    echo
+    if [ $rc -eq 0 ]; then printf '\e[38;5;114m✔ finished\e[0m'; else printf '\e[38;5;203m✘ exited with code %s\e[0m' "$rc"; fi
+    printf '   Press Enter to close…'
+    read -r _
+    exit $rc
+fi
+
+ARGS=""
+for a in "$@"; do ARGS="$ARGS $(printf '%q' "$a")"; done
+exec xfce4-terminal --title "Python: $(basename "$SCRIPT")" --working-directory "$DIR" \
+    -x env CLAUDIUS_IN_TERMINAL=1 bash -c "claudius-run-python $(printf '%q' "$SCRIPT")$ARGS"

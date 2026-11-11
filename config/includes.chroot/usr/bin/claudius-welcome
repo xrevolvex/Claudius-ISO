@@ -66,7 +66,7 @@ class Welcome(Gtk.Window):
     def __init__(self):
         super().__init__(title="Welcome to Claudius")
         self.get_style_context().add_class("claudius")
-        self.set_default_size(820, 560)
+        self.set_default_size(860, 640)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_icon_name("claudius")
 
@@ -111,11 +111,15 @@ class Welcome(Gtk.Window):
             ("firefox-esr", "Browse the web", "Firefox with a Claudius start page", ["firefox-esr"]),
             ("system-file-manager", "Your files", "Folders, USB drives and Trash", ["thunar"]),
             ("utilities-terminal", "Terminal", "Type  claudius  to see shortcuts", ["xfce4-terminal"]),
+            ("thonny", "Python", "Write and run scripts in Thonny", ["thonny", os.path.expanduser("~/Python/hello.py")]),
             ("libreoffice-startcenter", "Office", "Documents, spreadsheets, slides", ["libreoffice", "--writer"]),
             ("synaptic", "Get more apps", "Thousands of free Debian apps", ["pkexec", "synaptic"]),
+            ("preferences-desktop-theme", "Desktop layout", "Classic taskbar or Ubuntu-style dock", ["claudius-layout"]),
             ("preferences-desktop", "Settings", "Display, keyboard, theme and more", ["xfce4-settings-manager"]),
             ("preferences-desktop-display", "Screen size", "Change the resolution", ["xfce4-display-settings"]),
             ("input-keyboard", "Keyboard layout", "Add your language's layout", ["xfce4-keyboard-settings"]),
+            ("gufw", "Firewall", "On by default, blocks incoming connections", ["gufw"]),
+            ("gnome-disks", "Disks", "Drives, partitions and USB sticks", ["gnome-disks"]),
         ]
         for i, (icon, title, text, cmd) in enumerate(tiles):
             grid.attach(self.tile(icon, title, text, cmd), i % 4, i // 4, 1, 1)
@@ -126,6 +130,7 @@ class Welcome(Gtk.Window):
         tips.set_markup(
             "<b>Super</b> opens the menu · <b>Ctrl+Alt+T</b> opens a terminal · <b>Super+E</b> files · "
             "<b>Super+B</b> browser · <b>Ctrl+Shift+Esc</b> task manager · <b>Print</b> screenshot\n"
+            "Python examples are in your <b>Python</b> folder: double-click one to open it, press F5 to run it.\n"
             "Claudius tunes itself to the RAM of your VM at every boot. Run <b>claudius ram</b> in a "
             "terminal to see what it chose.")
         tips.get_style_context().add_class("tips")

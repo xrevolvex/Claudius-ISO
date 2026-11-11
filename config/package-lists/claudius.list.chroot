@@ -96,10 +96,33 @@ lsb-release
 # --- Performance: compressed RAM swap ------------------------
 zram-tools
 
-# --- Claudius Welcome (Python + GTK) --------------------------
+# --- Python: write and run scripts ---------------------------
 python3
 python3-gi
 gir1.2-gtk-3.0
+python3-pip
+python3-venv
+pipx
+python3-tk
+python3-requests
+python3-numpy
+ipython3
+idle
+thonny
+
+# --- Ubuntu-style features -------------------------------------
+yaru-theme-gtk
+yaru-theme-icon
+fonts-ubuntu
+xfce4-docklike-plugin
+command-not-found
+unattended-upgrades
+ufw
+gufw
+software-properties-gtk
+gnome-disk-utility
+flatpak
+zenity
 
 # --- Installer ----------------------------------------------------
 calamares

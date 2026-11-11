@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Desktop Layout
+GenericName=Switch desktop layout
+Comment=Switch between the classic taskbar and the Ubuntu-style top bar and dock
+Exec=claudius-layout
+Icon=preferences-desktop-theme
+Terminal=false
+Categories=Settings;DesktopSettings;XFCE;
+Keywords=layout;ubuntu;dock;panel;taskbar;theme;

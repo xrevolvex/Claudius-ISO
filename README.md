@@ -24,9 +24,21 @@ A Debian-based Linux desktop that tunes itself to the machine it runs on, from a
 | **Office and media** | LibreOffice Writer, Calc and Impress, VLC, a PDF viewer, an image viewer, a text and code editor (Mousepad, Geany) |
 | **Files** | Thunar file manager, archive support (zip, 7z, tar), USB drives, Trash |
 | **Terminal** | xfce4-terminal with a Claudius colour scheme, a custom prompt, a system card at startup, and the `claudius` helper command |
-| **Apps** | The whole Debian archive: `claudius install <app>` or Synaptic |
+| **Python** | Python 3 with pip, venv, pipx, tkinter, numpy, requests, IPython, IDLE and the **Thonny** IDE. Double-click a `.py` file to open it, right-click → **Run with Python** to run it, example scripts in `~/Python` |
+| **Ubuntu-style** | Switch to a **top bar + left dock** layout with the **Yaru** theme (`claudius layout ubuntu`), **ufw firewall** on by default, **automatic security updates**, **command-not-found** suggestions, **Software & Updates**, **GNOME Disks**, coloured `apt` with a progress bar, and **Flatpak + Flathub** |
+| **Apps** | The whole Debian archive: `claudius install <app>`, Synaptic, or Flathub apps with `claudius flatpak <id>` |
 | **Installer** | Calamares. Click **Install Claudius** on the desktop to install it to disk (BIOS or UEFI) |
 | **Welcome** | A welcome app with one-click shortcuts and tips |
+
+## Python, ready to go
+
+```bash
+python3 ~/Python/hello.py          # or just double-click it
+claudius newpy ~/Projects          # new project folder with its own .venv
+pipx install httpie                # command-line tools from PyPI, isolated
+```
+
+Thonny opens `.py` files by default (press <kbd>F5</kbd> to run). Geany, IDLE and IPython are there too. In the file manager, right-click a script → **Run with Python**, or right-click a folder → **New Python project here**.
 
 ## Built for speed
 
@@ -61,6 +73,12 @@ claudius install <app>    install apps (e.g. claudius install gimp)
 claudius remove <app>     remove apps
 claudius search <word>    search the catalogue
 claudius clean            free disk space
+claudius python <file>    run a Python script (no file: interactive Python)
+claudius newpy [folder]   new Python project with its own virtual environment
+claudius layout [name]    classic (Windows-like) or ubuntu (top bar + dock)
+claudius flatpak <app>    install from Flathub, e.g. org.gimp.GIMP
+claudius firewall [on|off]
+claudius guest-additions  install VirtualBox Guest Additions in one go
 claudius tips             keyboard shortcuts
 ```
 

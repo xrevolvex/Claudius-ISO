@@ -1,0 +1,3 @@
+// Ubuntu-style apt: colours and a progress bar
+APT::Color "1";
+Dpkg::Progress-Fancy "1";

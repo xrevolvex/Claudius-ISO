@@ -38,6 +38,12 @@ EOF
 	echo "$_U ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/90-claudius-live
 	chmod 440 /etc/sudoers.d/90-claudius-live
 
+	# No background package downloads in the live session (they stay on once installed)
+	for _t in apt-daily.timer apt-daily-upgrade.timer; do
+		systemctl stop "$_t" >/dev/null 2>&1 || true
+		systemctl mask --runtime "$_t" >/dev/null 2>&1 || true
+	done
+
 	mkdir -p /run/claudius
 	touch /run/claudius/live
 }

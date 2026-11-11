@@ -99,6 +99,53 @@ GRUB_CMDLINE_LINUX_DEFAULT="quiet"
 GRUB_BACKGROUND="/usr/share/claudius/boot/grub-background.png"
 EOF
 
+echo "I: [claudius] python and ubuntu-style features"
+# ---------------------------------------------------------------- .py files open in Thonny
+THONNY=$(basename "$(ls /usr/share/applications/*honny*.desktop 2>/dev/null | head -n1)" 2>/dev/null)
+[ -n "$THONNY" ] || THONNY=geany.desktop
+for f in /etc/xdg/mimeapps.list /usr/share/applications/mimeapps.list; do
+    cat > "$f" <<MIME
+[Default Applications]
+text/x-python3=$THONNY;claudius-run-python.desktop;
+text/x-python=$THONNY;claudius-run-python.desktop;
+text/html=firefox-esr.desktop
+x-scheme-handler/http=firefox-esr.desktop
+x-scheme-handler/https=firefox-esr.desktop
+application/pdf=atril.desktop
+inode/directory=thunar.desktop
+
+[Added Associations]
+text/x-python3=$THONNY;claudius-run-python.desktop;geany.desktop;
+text/x-python=$THONNY;claudius-run-python.desktop;geany.desktop;
+MIME
+done
+echo "   .py files open with $THONNY"
+# "python" runs python3
+[ -e /usr/bin/python ] || ln -s python3 /usr/bin/python
+
+# ---------------------------------------------------------------- firewall on (ufw: deny incoming, allow outgoing)
+if [ -f /etc/ufw/ufw.conf ]; then
+    sed -i 's/^ENABLED=.*/ENABLED=yes/' /etc/ufw/ufw.conf
+    systemctl enable ufw.service >/dev/null 2>&1 || true
+fi
+
+# ---------------------------------------------------------------- automatic security updates (installed system)
+cat > /etc/apt/apt.conf.d/20auto-upgrades <<'AUTO'
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+AUTO
+
+# ---------------------------------------------------------------- Flathub
+if command -v flatpak >/dev/null 2>&1; then
+    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || echo "   (flathub not added)"
+fi
+
+# ---------------------------------------------------------------- command-not-found database
+if command -v update-command-not-found >/dev/null 2>&1; then
+    apt-get update -qq >/dev/null 2>&1 || true
+    update-command-not-found >/dev/null 2>&1 || echo "   (command-not-found index not built)"
+fi
+
 echo "I: [claudius] slimming for low RAM"
 # ---------------------------------------------------------------- remove services a VM desktop doesn't need
 for p in modemmanager bluez cups cups-daemon cups-browsed avahi-daemon exim4-base exim4-daemon-light \
@@ -108,7 +155,7 @@ for p in modemmanager bluez cups cups-daemon cups-browsed avahi-daemon exim4-bas
         apt-get purge -y "$p" >/dev/null 2>&1 || echo "   (could not purge $p)"
     fi
 done
-for t in apt-daily.timer apt-daily-upgrade.timer man-db.timer e2scrub_all.timer \
+for t in man-db.timer e2scrub_all.timer \
          NetworkManager-wait-online.service ModemManager.service; do
     systemctl disable "$t" >/dev/null 2>&1 || true
 done

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Run with Python
+Comment=Run this Python script in a terminal
+Exec=claudius-run-python %f
+Icon=text-x-python
+Terminal=false
+NoDisplay=true
+MimeType=text/x-python3;text/x-python;application/x-python-code;

@@ -18,6 +18,14 @@ cat <<EOF
   ${B}claudius remove${R} <app>     remove apps
   ${B}claudius search${R} <word>    search the app catalogue
   ${B}claudius clean${R}            free disk space (package cache, old logs, trash)
+
+  ${B}claudius python${R} <file>    run a Python script     ${D}(no file: open Python)${R}
+  ${B}claudius newpy${R} [folder]   new Python project with its own virtual environment
+  ${B}claudius layout${R} [name]    desktop layout: classic (Windows-like) or ubuntu
+  ${B}claudius flatpak${R} <app>    install an app from Flathub (e.g. org.gimp.GIMP)
+  ${B}claudius firewall${R} [on|off] show or switch the firewall (ufw)
+  ${B}claudius guest-additions${R}  install VirtualBox Guest Additions (auto-resize, clipboard)
+
   ${B}claudius tips${R}             keyboard shortcuts and tricks
   ${B}claudius about${R}            version and project link
 
@@ -54,6 +62,38 @@ case "${1:-}" in
         sudo journalctl --vacuum-size=50M >/dev/null 2>&1
         rm -rf "$HOME/.local/share/Trash/"* "$HOME/.cache/thumbnails/"* 2>/dev/null
         df -h / ;;
+    python|py|run)
+        shift
+        if [ $# -eq 0 ]; then exec ipython3 2>/dev/null || exec python3; fi
+        exec claudius-run-python "$@" ;;
+    newpy|new-python|new-project)
+        exec python3 /usr/share/claudius/python/new_project.py "${2:-$PWD}" ;;
+    layout)  exec claudius-layout "${2:-}" ;;
+    flatpak)
+        shift; [ $# -gt 0 ] || { echo "which app? find IDs at https://flathub.org  (e.g. org.gimp.GIMP)"; exit 1; }
+        flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+        flatpak install --user -y flathub "$@" ;;
+    firewall|ufw)
+        case "${2:-}" in
+            on)  sudo ufw enable ;;
+            off) sudo ufw disable ;;
+            *)   sudo ufw status verbose ;;
+        esac ;;
+    guest-additions|vbox|ga)
+        echo "Installing what the VirtualBox Guest Additions need..."
+        sudo apt update && sudo apt install -y build-essential dkms "linux-headers-$(uname -r)" || exit 1
+        echo
+        echo "Now, in the VirtualBox window menu: Devices > Insert Guest Additions CD image..."
+        read -r -p "Press Enter when the CD is inserted. " _
+        sudo mkdir -p /mnt/vbox-ga
+        sudo mount -o ro /dev/sr0 /mnt/vbox-ga 2>/dev/null || sudo mount -o ro /dev/cdrom /mnt/vbox-ga
+        if [ -f /mnt/vbox-ga/VBoxLinuxAdditions.run ]; then
+            sudo sh /mnt/vbox-ga/VBoxLinuxAdditions.run
+            sudo umount /mnt/vbox-ga
+            echo "Done. Restart Claudius to turn on auto-resize and the shared clipboard."
+        else
+            echo "Couldn't find the Guest Additions CD. Insert it and run this again."
+        fi ;;
     tips)
 cat <<EOF
 
@@ -69,6 +109,15 @@ cat <<EOF
 
   ${B}Terminal${R}
     Tab completes commands and file names. Ctrl+R searches your history.
+    Mistyped or missing command? Claudius suggests the package to install.
+
+  ${B}Python${R}
+    Double-click a .py file to open it in Thonny (F5 runs it).
+    Right-click > Run with Python runs it in a terminal. Examples: ~/Python
+
+  ${B}Looks${R}
+    claudius layout ubuntu   top bar + dock, Yaru theme
+    claudius layout classic  bottom taskbar + start menu
 
 EOF
         ;;
