@@ -1,8 +1,0 @@
-# Packages copied to a pool on the ISO, so the installer can set up the
-# right bootloader (BIOS or UEFI) without an internet connection.
-grub-pc
-grub-efi-amd64
-grub-efi-amd64-signed
-shim-signed
-cryptsetup
-keyutils

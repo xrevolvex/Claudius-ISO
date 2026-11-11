@@ -79,13 +79,20 @@ echo "I: [claudius] installer"
 # ---------------------------------------------------------------- Calamares
 if [ -f /etc/calamares/settings.conf ]; then
     sed -i 's/^branding:.*/branding: claudius/' /etc/calamares/settings.conf
-    echo "---- calamares settings.conf ----"; cat /etc/calamares/settings.conf
-    echo "---- calamares modules ----"; ls -la /etc/calamares/modules/ || true
-    for m in bootloader users unpackfs packages welcome displaymanager shellprocess* sources*; do
-        for f in /etc/calamares/modules/$m.conf; do [ -f "$f" ] && { echo "== $f"; grep -v '^\s*#' "$f" | grep -v '^\s*$'; }; done
+    # The ISO carries no package pool: skip the steps that mount it as an apt source
+    sed -i -e '/^[[:space:]]*-[[:space:]]*sources-media$/d' \
+           -e '/^[[:space:]]*-[[:space:]]*sources-media-unmount$/d' /etc/calamares/settings.conf
+    echo "---- calamares install sequence ----"; sed -n '/^- exec:/,/^- show:/p' /etc/calamares/settings.conf
+    echo "---- calamares modules ----"; ls /etc/calamares/modules/ /usr/lib/calamares/modules/ 2>/dev/null | tr '\n' ' '; echo
+    for d in /usr/lib/calamares/modules/bootloader-config; do
+        [ -d "$d" ] && for f in "$d"/*; do echo "== $f"; cat "$f"; done
     done
-    echo "---- calamares-settings-debian files ----"; dpkg -L calamares-settings-debian | grep -v '/usr/share/doc' || true
 fi
+# Both GRUB flavours ship as .debs; the installer picks the one for BIOS or UEFI
+mkdir -p /usr/share/claudius/grub-debs
+( cd /usr/share/claudius/grub-debs && apt-get download grub-pc grub-efi-amd64 ) \
+    || echo "   (could not download grub .debs)"
+ls -la /usr/share/claudius/grub-debs
 # Debian's own "Install Debian" launcher is replaced by "Install Claudius"
 rm -f /usr/share/applications/install-debian.desktop /usr/share/applications/calamares.desktop \
       /usr/share/applications/calamares-install-debian.desktop \
