@@ -81,18 +81,19 @@ WALL_BOX = 256                     # the 512-unit emblem box drawn at 256 px (sc
 WALL_CX, WALL_CY = 960, 1080 * 0.57
 
 
-def flat_bg(w, h):
-    return f'<rect width="{w}" height="{h}" fill="{BG}"/>'
+def flat_bg(w, h, color=None):
+    return f'<rect width="{w}" height="{h}" fill="{color or BG}"/>'
 
 
-def version_tag(w, h, ref=1080):
+def version_tag(w, h, ref=1080, text="#ffffff", accent=None):
     """'1.0' with a smaller 'xrevolvex' underneath, bottom-right corner."""
+    accent = accent or ORANGE
     s = h / ref
     x, y = w - 64 * s, h - 78 * s
     return (f'<text x="{x:.1f}" y="{y:.1f}" text-anchor="end" font-family="Inter Display, Inter, sans-serif" '
-            f'font-weight="600" font-size="{34*s:.1f}" fill="#ffffff" fill-opacity="0.88">1.0</text>'
+            f'font-weight="600" font-size="{34*s:.1f}" fill="{text}" fill-opacity="0.88">1.0</text>'
             f'<text x="{x:.1f}" y="{y + 28*s:.1f}" text-anchor="end" font-family="Inter, sans-serif" '
-            f'font-weight="500" font-size="{17*s:.1f}" letter-spacing="{1.5*s:.1f}" fill="{ORANGE}">xrevolvex</text>')
+            f'font-weight="500" font-size="{17*s:.1f}" letter-spacing="{1.5*s:.1f}" fill="{accent}">xrevolvex</text>')
 
 
 def placed_emblem(cx, cy, box_px, fill=ORANGE):
@@ -100,9 +101,17 @@ def placed_emblem(cx, cy, box_px, fill=ORANGE):
     return f'<g transform="translate({cx - 256*sc:.2f},{cy - 256*sc:.2f}) scale({sc:.5f})">{emblem(grad=fill)}</g>'
 
 
-def wallpaper_svg(w=1920, h=1080):
+def wallpaper_svg(w=1920, h=1080, accent=None, light=False):
     s = h / 1080
-    return svg(w, h, flat_bg(w, h) + placed_emblem(WALL_CX * s, WALL_CY * s, WALL_BOX * s) + version_tag(w, h))
+    accent = accent or ORANGE
+    bg, text = ("#eef1f8", "#1a2242") if light else (BG, "#ffffff")
+    return svg(w, h, flat_bg(w, h, bg) + placed_emblem(WALL_CX * s, WALL_CY * s, WALL_BOX * s, accent)
+               + version_tag(w, h, text=text, accent=accent))
+
+
+# Wallpaper pack: one flat wallpaper per accent colour, dark and light (matches common.ACCENTS)
+ACCENT_COLORS = {"orange": "#ff9447", "blue": "#4c8dff", "green": "#3ecf8e", "teal": "#2ec4c9",
+                 "purple": "#a77bff", "pink": "#ff6fb5", "red": "#ff5f6d"}
 
 
 def login_svg(w=1920, h=1080):
@@ -189,6 +198,9 @@ def main():
         "version-tag.svg": version_tag_svg(),
         "installer-welcome.svg": welcome_svg(),
     }
+    for acc, col in ACCENT_COLORS.items():
+        sources[f"wall-{acc}.svg"] = wallpaper_svg(accent=col)
+        sources[f"wall-{acc}-light.svg"] = wallpaper_svg(accent=col, light=True)
     for name, content in sources.items():
         (SVG_DIR / name).write_text(content)
     print(f"wrote {len(sources)} SVGs to {SVG_DIR}")
@@ -215,6 +227,10 @@ def main():
     ]
     for size in (16, 22, 24, 32, 48, 64, 128, 256):
         jobs.append(("claudius-icon.svg", f"icon-{size}.png", size, size))
+    (PNG_DIR / "wallpapers").mkdir(parents=True, exist_ok=True)
+    for acc in ACCENT_COLORS:
+        for suffix in ("", "-light"):
+            jobs.append((f"wall-{acc}{suffix}.svg", f"wallpapers/claudius-{acc}{suffix}.png", 1920, 1080))
     with sync_playwright() as p:
         b = p.chromium.launch()
         page = b.new_page()

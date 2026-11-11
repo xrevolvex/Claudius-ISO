@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=App Center
+GenericName=Install software
+Comment=Install apps in one click
+Exec=claudius-center --page apps
+Icon=system-software-install
+Terminal=false
+Categories=System;
+StartupNotify=true

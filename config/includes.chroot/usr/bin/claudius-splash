@@ -75,8 +75,8 @@ class Splash(Gtk.Window):
             pass
         self.start_box = g["anim"]["box"]
         w = g["wallpaper"]
-        # The wallpaper is shown "zoomed" (scaled to cover, centred): map its C onto this screen
-        scale = max(self.W / w["width"], self.H / w["height"])
+        # The wallpaper is shown "scaled" (fitted, centred, on a matching colour): map its C onto this screen
+        scale = min(self.W / w["width"], self.H / w["height"])
         ox = (self.W - w["width"] * scale) / 2
         oy = (self.H - w["height"] * scale) / 2
         self.end = (ox + w["cx"] * scale, oy + w["cy"] * scale, w["box"] * scale)

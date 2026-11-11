@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Claudius first-boot setup
+Exec=claudius-setup --first-login
+NoDisplay=true
+OnlyShowIn=XFCE;
+X-XFCE-Autostart-Override=true

@@ -1,0 +1,12 @@
+#!/bin/sh
+# Claudius update notifier (claudius-update-check.timer, every 6 hours).
+[ -d /run/live/medium ] && exit 0
+N=$(apt list --upgradable 2>/dev/null | grep -c 'upgradable')
+S=$(apt list --upgradable 2>/dev/null | grep -c -- '-security')
+if [ -e /run/reboot-required ]; then
+    notify-send -a "Update Center" -i system-reboot "Restart to finish updating" \
+        "Updates were installed. Restart when convenient, or schedule it in the Update Center."
+elif [ "$N" -gt 0 ]; then
+    notify-send -a "Update Center" -i system-software-update "$N updates available" \
+        "$S of them are security updates. Open the Update Center to install them."
+fi

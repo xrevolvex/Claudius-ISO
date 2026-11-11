@@ -17,7 +17,10 @@ Claudius_live ()
 	fi
 
 	echo "$_U:claudius" | chpasswd && echo "claudius-live: password set for $_U"
-	usermod -c "Claudius Live (password: claudius)" "$_U" 2>/dev/null || true
+	usermod -c "Claudius" "$_U" 2>/dev/null || true
+	# AccountsService caches the old name for the login screen: refresh it
+	rm -f "/var/lib/AccountsService/users/$_U" 2>/dev/null
+	systemctl try-restart accounts-daemon.service >/dev/null 2>&1 || true
 
 	# Login screen must ask for the password
 	rm -f /etc/lightdm/lightdm.conf.d/*autologin* 2>/dev/null || true

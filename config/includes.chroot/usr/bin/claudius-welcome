@@ -116,13 +116,13 @@ class Welcome(Gtk.Window):
             ("utilities-terminal", "Terminal", "Type  claudius  to see shortcuts", ["xfce4-terminal"]),
             ("thonny", "Python", "Write and run scripts in Thonny", ["thonny", os.path.expanduser("~/Python/hello.py")]),
             ("libreoffice-startcenter", "Office", "Documents, spreadsheets, slides", ["libreoffice", "--writer"]),
-            ("synaptic", "Get more apps", "Thousands of free Debian apps", ["pkexec", "synaptic"]),
-            ("preferences-desktop-theme", "Desktop layout", "Classic taskbar or Ubuntu-style dock", ["claudius-layout"]),
-            ("preferences-desktop", "Settings", "Display, keyboard, theme and more", ["xfce4-settings-manager"]),
+            ("system-software-install", "App Center", "Install apps in one click", ["claudius-center", "--page", "apps"]),
+            ("preferences-desktop-theme", "Look & layout", "Accent colour, Windows/macOS/Ubuntu layout", ["claudius-center", "--page", "appearance"]),
+            ("claudius", "Claudius Center", "Every setting and tool (Super+I)", ["claudius-center"]),
             ("preferences-desktop-display", "Screen size", "Change the resolution", ["xfce4-display-settings"]),
             ("input-keyboard", "Keyboard layout", "Add your language's layout", ["xfce4-keyboard-settings"]),
-            ("gufw", "Firewall", "On by default, blocks incoming connections", ["gufw"]),
-            ("gnome-disks", "Disks", "Drives, partitions and USB sticks", ["gnome-disks"]),
+            ("security-high", "Security Center", "Firewall, encryption and recommendations", ["claudius-center", "--page", "security"]),
+            ("system-software-update", "Update Center", "Updates, history and restarts", ["claudius-center", "--page", "updates"]),
         ]
         for i, (icon, title, text, cmd) in enumerate(tiles):
             grid.attach(self.tile(icon, title, text, cmd), i % 4, i // 4, 1, 1)
@@ -131,8 +131,8 @@ class Welcome(Gtk.Window):
         # ---- tips --------------------------------------------------------------
         tips = Gtk.Label(xalign=0, wrap=True, margin_start=24, margin_end=24)
         tips.set_markup(
-            "<b>Super</b> opens the menu · <b>Ctrl+Alt+T</b> opens a terminal · <b>Super+E</b> files · "
-            "<b>Super+B</b> browser · <b>Ctrl+Shift+Esc</b> task manager · <b>Print</b> screenshot\n"
+            "<b>Super</b> search · <b>Super+A</b> all apps · <b>Super+S</b> Quick Settings · <b>Super+I</b> Claudius Center · "
+            "<b>Ctrl+Alt+T</b> terminal · <b>Print</b> screenshot · <b>Super+Shift+R</b> record the screen\n"
             "Python examples are in your <b>Python</b> folder: double-click one to open it, press F5 to run it.\n"
             "Claudius tunes itself to the RAM of your VM at every boot. Run <b>claudius ram</b> in a "
             "terminal to see what it chose.")

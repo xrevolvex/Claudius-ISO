@@ -27,6 +27,10 @@ cat <<EOF
   ${B}claudius firewall${R} [on|off] show or switch the firewall (ufw)
   ${B}claudius guest-additions${R}  install VirtualBox Guest Additions (auto-resize, clipboard)
 
+  ${B}claudius center${R} [page]    open Claudius Center (updates, apps, security, backup, monitor…)
+  ${B}claudius capture${R}          screenshots and screen recording
+  ${B}claudius setup${R}            the setup checklist
+
   ${B}claudius tips${R}             keyboard shortcuts and tricks
   ${B}claudius about${R}            version and project link
 
@@ -70,6 +74,9 @@ case "${1:-}" in
     newpy|new-python|new-project)
         exec python3 /usr/share/claudius/python/new_project.py "${2:-$PWD}" ;;
     layout)  exec claudius-layout "${2:-}" ;;
+    center|settings) if [ -n "${2:-}" ]; then exec claudius-center --page "$2"; else exec claudius-center; fi ;;
+    capture|screenshot) exec claudius-capture ;;
+    setup)   exec claudius-setup ;;
     refresh|hz)
         if [ -n "${2:-}" ]; then
             case "$2" in auto|60|75|90|100|120|144|165|240) ;; *) echo "use: auto, 60, 75, 120, 144, 165 or 240"; exit 1 ;; esac
@@ -107,10 +114,13 @@ case "${1:-}" in
 cat <<EOF
 
   ${B}Keyboard${R}
-    Super ............... app menu            Ctrl+Alt+T ...... terminal
+    Super ............... Launcher (search)   Super+A ......... all apps
+    Super+S ............. Quick Settings      Super+N ......... notifications
+    Super+I ............. Claudius Center     Ctrl+Alt+T ...... terminal
     Super+E ............. files               Super+B ......... browser
-    Ctrl+Shift+Esc ...... task manager        Print ........... screenshot
-    Alt+Tab ............. switch windows      Drag to an edge . snap a window
+    Print ............... screenshot (annotate)   Shift+Print .. whole screen
+    Super+Shift+R ....... start/stop recording    Ctrl+Shift+Esc System Monitor
+    Super+Arrows ........ tile windows        Alt+Tab ......... switch windows
 
   ${B}VirtualBox${R}
     Bigger screen: Settings > Display, or Devices > Insert Guest Additions CD

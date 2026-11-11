@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Claudius Center
+GenericName=Settings and system tools
+Comment=All settings and tools in one place
+Exec=claudius-center
+Icon=claudius
+Terminal=false
+Categories=Settings;System;
+StartupNotify=true

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Update Center
+GenericName=Software updates
+Comment=Install updates, see history, schedule restarts
+Exec=claudius-center --page updates
+Icon=system-software-update
+Terminal=false
+Categories=System;Settings;
+StartupNotify=true

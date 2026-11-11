@@ -129,6 +129,24 @@ gnome-disk-utility
 flatpak
 zenity
 
+# --- Claudius tools: Capture, Quick Settings, Update/Backup/Security Center, Launcher, Desktop
+flameshot
+ffmpeg
+slop
+plank
+timeshift
+redshift
+brightnessctl
+pulseaudio-utils
+xclip
+plocate
+rfkill
+rsync
+libnotify-bin
+network-manager-openvpn-gnome
+wireguard-tools
+xfce4-screenshooter
+
 # --- Installer ----------------------------------------------------
 calamares
 calamares-settings-debian

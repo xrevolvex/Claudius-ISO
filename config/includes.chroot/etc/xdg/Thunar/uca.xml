@@ -47,4 +47,54 @@
 	<patterns>*</patterns>
 	<directories/>
 </action>
+<action>
+	<icon>preferences-desktop-wallpaper</icon>
+	<name>Set as wallpaper</name>
+	<submenu></submenu>
+	<unique-id>claudius-set-wallpaper</unique-id>
+	<command>claudius-set-wallpaper %f</command>
+	<description>Use this picture as the desktop background</description>
+	<range>1-1</range>
+	<patterns>*.png;*.jpg;*.jpeg;*.webp;*.svg;*.PNG;*.JPG;*.JPEG</patterns>
+	<image-files/>
+</action>
+<action>
+	<icon>edit-copy</icon>
+	<name>Copy path</name>
+	<submenu></submenu>
+	<unique-id>claudius-copy-path</unique-id>
+	<command>sh -c 'printf "%%s" "$1" | xclip -selection clipboard' _ %f</command>
+	<description>Copy the full path of this item</description>
+	<range>1-1</range>
+	<patterns>*</patterns>
+	<directories/>
+	<audio-files/>
+	<image-files/>
+	<other-files/>
+	<text-files/>
+	<video-files/>
+</action>
+<action>
+	<icon>dialog-password</icon>
+	<name>Open as administrator</name>
+	<submenu></submenu>
+	<unique-id>claudius-open-root</unique-id>
+	<command>pkexec env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTHORITY" thunar %f</command>
+	<description>Open this folder with administrator rights (be careful)</description>
+	<range>1-1</range>
+	<patterns>*</patterns>
+	<directories/>
+</action>
+<action>
+	<icon>utilities-terminal</icon>
+	<name>Run in terminal</name>
+	<submenu></submenu>
+	<unique-id>claudius-run-script</unique-id>
+	<command>xfce4-terminal --hold --working-directory %d -x %f</command>
+	<description>Run this script or program in a terminal</description>
+	<range>1-1</range>
+	<patterns>*.sh;*.run;*.AppImage;*.appimage</patterns>
+	<other-files/>
+	<text-files/>
+</action>
 </actions>

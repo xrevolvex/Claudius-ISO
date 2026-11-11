@@ -13,6 +13,10 @@ install -m644 "$PNG/claudius-wallpaper-1920x1080.png" "$DEST/usr/share/claudius/
 install -m644 "$PNG/claudius-wallpaper-2560x1440.png" "$DEST/usr/share/claudius/wallpapers/claudius-default-2560.png"
 install -m644 "$PNG/claudius-login-1920x1080.png"     "$DEST/usr/share/claudius/wallpapers/claudius-login.png"
 ln -sf /usr/share/claudius/wallpapers/claudius-default.png "$DEST/usr/share/backgrounds/claudius/default.png"
+# accent wallpaper pack (Claudius Center > Appearance)
+for f in "$PNG"/wallpapers/claudius-*.png; do
+    [ -f "$f" ] && install -m644 "$f" "$DEST/usr/share/claudius/wallpapers/$(basename "$f")"
+done
 
 install -m644 "$PNG/claudius-logo-256.png"   "$DEST/usr/share/claudius/logo/claudius-logo.png"
 install -m644 "$PNG/claudius-avatar-96.png"  "$DEST/usr/share/claudius/logo/claudius-avatar.png"

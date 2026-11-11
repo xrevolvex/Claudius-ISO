@@ -2,7 +2,7 @@
 # First-login setup for every Claudius user (started from XDG autostart).
 # Sets the wallpaper for whatever monitor name the VM reports, adds keyboard
 # shortcuts and trusts the desktop launchers. Runs once per user.
-STAMP="$HOME/.config/claudius/session-setup-v1"
+STAMP="$HOME/.config/claudius/session-setup-v2"
 [ -f "$STAMP" ] && exit 0
 mkdir -p "$(dirname "$STAMP")"
 sleep 3
@@ -16,18 +16,33 @@ for m in $MONS 0 Virtual-1 Virtual1 VGA-1 screen; do
     for ws in 0 1 2 3; do
         P="/backdrop/screen0/monitor$m/workspace$ws"
         xq -c xfce4-desktop -p "$P/last-image"  -n -t string -s "$WP"
-        xq -c xfce4-desktop -p "$P/image-style" -n -t int    -s 5
+        xq -c xfce4-desktop -p "$P/image-style" -n -t int    -s 4
+        xq -c xfce4-desktop -p "$P/color-style" -n -t int    -s 0
+        xq -c xfce4-desktop -p "$P/rgba1" -r
+        xq -c xfce4-desktop -p "$P/rgba1" -n -t double -s 0.0706 -t double -s 0.0941 -t double -s 0.1882 -t double -s 1
     done
 done
 xfdesktop --reload >/dev/null 2>&1 || true
 
-# Keyboard shortcuts
-xq -c xfce4-keyboard-shortcuts -p '/commands/custom/Super_L'          -n -t string -s xfce4-popup-whiskermenu
-xq -c xfce4-keyboard-shortcuts -p '/commands/custom/<Primary><Alt>t'  -n -t string -s xfce4-terminal
-xq -c xfce4-keyboard-shortcuts -p '/commands/custom/<Super>e'         -n -t string -s thunar
-xq -c xfce4-keyboard-shortcuts -p '/commands/custom/<Super>b'         -n -t string -s firefox-esr
-xq -c xfce4-keyboard-shortcuts -p '/commands/custom/<Primary><Shift>Escape' -n -t string -s xfce4-taskmanager
-xq -c xfce4-keyboard-shortcuts -p '/commands/custom/Print'            -n -t string -s 'xfce4-screenshooter -f'
+# Keyboard shortcuts (change them in Claudius Center > Desktop)
+K=/commands/custom
+xq -c xfce4-keyboard-shortcuts -p "$K/Super_L"                 -n -t string -s claudius-launcher
+xq -c xfce4-keyboard-shortcuts -p "$K/<Super>a"                -n -t string -s 'claudius-launcher --grid'
+xq -c xfce4-keyboard-shortcuts -p "$K/<Super>s"                -n -t string -s claudius-quick
+xq -c xfce4-keyboard-shortcuts -p "$K/<Super>n"                -n -t string -s 'claudius-quick --notifications'
+xq -c xfce4-keyboard-shortcuts -p "$K/<Super>i"                -n -t string -s claudius-center
+xq -c xfce4-keyboard-shortcuts -p "$K/Print"                   -n -t string -s 'claudius-capture --region'
+xq -c xfce4-keyboard-shortcuts -p "$K/<Shift>Print"            -n -t string -s 'claudius-capture --full'
+xq -c xfce4-keyboard-shortcuts -p "$K/<Alt>Print"              -n -t string -s 'claudius-capture --window'
+xq -c xfce4-keyboard-shortcuts -p "$K/<Super><Shift>r"         -n -t string -s 'claudius-capture --record-toggle'
+xq -c xfce4-keyboard-shortcuts -p "$K/<Primary><Alt>t"         -n -t string -s xfce4-terminal
+xq -c xfce4-keyboard-shortcuts -p "$K/<Super>e"                -n -t string -s thunar
+xq -c xfce4-keyboard-shortcuts -p "$K/<Super>b"                -n -t string -s firefox-esr
+xq -c xfce4-keyboard-shortcuts -p "$K/<Primary><Shift>Escape"  -n -t string -s 'claudius-center --page monitor'
+# Super+Arrows tile windows
+for k in Left:tile_left_key Right:tile_right_key Up:maximize_window_key Down:hide_window_key; do
+    xq -c xfce4-keyboard-shortcuts -p "/xfwm4/custom/<Super>${k%%:*}" -n -t string -s "${k#*:}"
+done
 
 # Trust launchers on the desktop (XFCE asks before running untrusted ones)
 DESK=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")

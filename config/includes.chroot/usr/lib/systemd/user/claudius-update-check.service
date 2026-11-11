@@ -1,0 +1,6 @@
+[Unit]
+Description=Claudius update notifier
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/claudius/update-check

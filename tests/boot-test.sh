@@ -47,11 +47,29 @@ login_and_explore() {  # login_and_explore <prefix> <with firefox: yes/no>
     ctl type "clear; python3 ~/Python/numbers_demo.py && python3 ~/Python/system_info.py\n"
     pause 6;   shot "$p-5-python"
     if [ "$2" = yes ]; then
+        ctl type "clear; setsid claudius-center --page monitor >/dev/null 2>&1 &\n"
+        pause 12; shot "$p-6-center-monitor"
+        ctl key alt-f4; sleep 2
+        ctl type "setsid claudius-center --page appearance >/dev/null 2>&1 &\n"
+        pause 10; shot "$p-7-center-appearance"
+        ctl key alt-f4; sleep 2
+        ctl type "setsid claudius-center --page apps >/dev/null 2>&1 &\n"
+        pause 12; shot "$p-8-app-center"
+        ctl key alt-f4; sleep 2
+        ctl type "setsid claudius-quick >/dev/null 2>&1 &\n"
+        pause 6;  shot "$p-9-quick-settings"
+        ctl key esc; sleep 2
+        ctl key meta_l; sleep 3
+        ctl type "fire"
+        pause 3;  shot "$p-10-launcher"
+        ctl key esc; sleep 2
         ctl type "firefox-esr &\n"
-        pause 40; shot "$p-6-firefox"
+        pause 40; shot "$p-11-firefox"
     else
         ctl type "claudius layout ubuntu\n"
         pause 14; shot "$p-6-ubuntu-layout"
+        ctl type "claudius layout macos\n"
+        pause 14; shot "$p-7-macos-layout"
     fi
 }
 

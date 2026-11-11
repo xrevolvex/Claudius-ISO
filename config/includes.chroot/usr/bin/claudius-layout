@@ -1,31 +1,33 @@
 #!/bin/bash
 # =============================================================================
-#  claudius-layout: switch the desktop between layouts.
+#  claudius-layout: switch the desktop layout. Nothing is reinstalled.
 #
-#    claudius-layout classic   bottom taskbar + start menu (Windows-like), Arc-Dark
-#    claudius-layout ubuntu    top bar + left dock (Ubuntu-like), Yaru-dark
-#    claudius-layout           pick one in a dialog
+#    claudius-layout classic   Windows-like: bottom taskbar with a start menu
+#    claudius-layout macos     macOS-like: top menu bar + zooming dock (Plank)
+#    claudius-layout ubuntu    Ubuntu-like: top bar + dock on the left, Yaru theme
+#    claudius-layout           choose in a dialog
 # =============================================================================
 set -u
 CHOICE="${1:-}"
 if [ -z "$CHOICE" ]; then
-    CHOICE=$(zenity --list --radiolist --title "Desktop layout" --width 440 --height 260 \
+    CHOICE=$(zenity --list --radiolist --title "Desktop layout" --width 480 --height 300 \
         --text "Choose how your Claudius desktop looks:" \
         --column "" --column "Layout" --column "Description" \
-        TRUE classic "Taskbar at the bottom, start menu (Windows-like)" \
-        FALSE ubuntu "Top bar and a dock on the left (Ubuntu-like)" 2>/dev/null) || exit 0
+        TRUE classic "Windows: taskbar at the bottom, start menu" \
+        FALSE macos "macOS: top menu bar, zooming dock at the bottom" \
+        FALSE ubuntu "Ubuntu: top bar, dock on the left" 2>/dev/null) || exit 0
 fi
 
 CONF="$HOME/.config/xfce4/xfconf/xfce-perchannel-xml"
 PANEL_DIR="$HOME/.config/xfce4/panel"
-mkdir -p "$CONF" "$PANEL_DIR"
+L=/usr/share/claudius/layouts
+mkdir -p "$CONF" "$PANEL_DIR" "$HOME/.config/claudius" "$HOME/.config/autostart"
 xq() { xfconf-query "$@" 2>/dev/null || true; }
 
-theme() {  # theme <gtk> <icons> <wm> <font>
+theme() {  # theme <gtk> <icons> <wm>
     xq -c xsettings -p /Net/ThemeName -s "$1"
     xq -c xsettings -p /Net/IconThemeName -s "$2"
     [ -d "/usr/share/themes/$3/xfwm4" ] && xq -c xfwm4 -p /general/theme -s "$3"
-    xq -c xsettings -p /Gtk/FontName -s "$4"
 }
 
 restart_panel() {  # restart_panel <xml file>
@@ -39,27 +41,59 @@ restart_panel() {  # restart_panel <xml file>
     sleep 2
 }
 
+dock_off() {
+    pkill -x plank 2>/dev/null
+    rm -f "$HOME/.config/autostart/plank.desktop"
+}
+
+dock_on() {
+    command -v plank >/dev/null || return 0
+    local S="net.launchpad.plank.dock.settings:/net/launchpad/plank/docks/dock1/"
+    local D="$HOME/.config/plank/dock1/launchers"
+    if [ ! -d "$D" ] || [ -z "$(ls -A "$D" 2>/dev/null)" ]; then
+        mkdir -p "$D"
+        for app in firefox-esr thunar xfce4-terminal libreoffice-writer vlc org.thonny.Thonny claudius-center; do
+            [ -f "/usr/share/applications/$app.desktop" ] && printf '[PlankDockItemPreferences]\nLauncher=file:///usr/share/applications/%s.desktop\n' "$app" > "$D/$app.dockitem"
+        done
+    fi
+    gsettings set "$S" theme 'Claudius' 2>/dev/null
+    gsettings set "$S" zoom-enabled true 2>/dev/null
+    gsettings set "$S" zoom-percent 165 2>/dev/null
+    gsettings set "$S" icon-size 48 2>/dev/null
+    gsettings set "$S" position 'bottom' 2>/dev/null
+    gsettings set "$S" hide-mode 'dodge-maximized' 2>/dev/null
+    gsettings set "$S" show-dock-item false 2>/dev/null
+    printf '[Desktop Entry]\nType=Application\nName=Plank dock\nExec=plank\nNoDisplay=true\nOnlyShowIn=XFCE;\n' > "$HOME/.config/autostart/plank.desktop"
+    pkill -x plank 2>/dev/null
+    (setsid plank >/dev/null 2>&1 &)
+}
+
+with_dock_fallback() {  # use an icon-only task list if the docklike plugin is missing
+    if ls /usr/lib/*/xfce4/panel/plugins/libdocklike.so >/dev/null 2>&1; then
+        echo "$1"
+    else
+        T=$(mktemp -d)
+        sed 's/value="docklike"\/>/value="tasklist"><property name="show-labels" type="bool" value="false"\/><\/property>/' "$1" > "$T/xfce4-panel.xml"
+        echo "$T/xfce4-panel.xml"
+    fi
+}
+
 case "$CHOICE" in
     classic|windows|default)
+        dock_off
         restart_panel /etc/xdg/xfce4/panel/default.xml
-        theme Arc-Dark Papirus-Dark Arc-Dark "Cantarell 10"
-        echo classic > "$HOME/.config/claudius/layout" 2>/dev/null ;;
+        theme Arc-Dark Papirus-Dark Arc-Dark ;;
+    macos|mac)
+        restart_panel "$L/macos/xfce4-panel.xml"
+        dock_on
+        theme Arc-Dark Papirus-Dark Arc-Dark
+        xq -c xfwm4 -p /general/button_layout -s "CHM|O" ;;
     ubuntu)
-        L=/usr/share/claudius/layouts/ubuntu
-        if ls /usr/lib/*/xfce4/panel/plugins/libdocklike.so >/dev/null 2>&1; then
-            restart_panel "$L/xfce4-panel.xml"
-        else   # no dock plugin: use an icon-only task list instead
-            T=$(mktemp -d); sed 's/value="docklike"\/>/value="tasklist"><property name="show-labels" type="bool" value="false"\/><\/property>/' \
-                "$L/xfce4-panel.xml" > "$T/xfce4-panel.xml"
-            restart_panel "$T/xfce4-panel.xml"; rm -rf "$T"
-        fi
-        if fc-list | grep -qi "Ubuntu"; then FONT="Ubuntu 10"; else FONT="Cantarell 10"; fi
-        if [ -d /usr/share/themes/Yaru-dark ]; then
-            theme Yaru-dark Yaru-dark Yaru-dark "$FONT"
-        else
-            theme Arc-Dark Papirus-Dark Arc-Dark "$FONT"
-        fi
-        mkdir -p "$HOME/.config/claudius"; echo ubuntu > "$HOME/.config/claudius/layout" ;;
-    *) echo "usage: claudius-layout [classic|ubuntu]"; exit 1 ;;
+        dock_off
+        restart_panel "$(with_dock_fallback "$L/ubuntu/xfce4-panel.xml")"
+        if [ -d /usr/share/themes/Yaru-dark ]; then theme Yaru-dark Yaru-dark Yaru-dark; else theme Arc-Dark Papirus-Dark Arc-Dark; fi ;;
+    *) echo "usage: claudius-layout [classic|macos|ubuntu]"; exit 1 ;;
 esac
+[ "$CHOICE" != macos ] && [ "$CHOICE" != mac ] && xq -c xfwm4 -p /general/button_layout -s "O|HMC"
+echo "$CHOICE" > "$HOME/.config/claudius/layout"
 echo "Layout: $CHOICE"

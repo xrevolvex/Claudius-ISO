@@ -1,0 +1,10 @@
+#!/bin/sh
+# claudius-set-wallpaper <picture>: set the desktop background on every monitor and workspace
+[ -f "$1" ] || exit 1
+P=$(readlink -f "$1")
+PROPS=$(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep 'last-image$')
+[ -n "$PROPS" ] || PROPS=$(for m in $(xrandr --query | awk '/ connected/{print $1}'); do for w in 0 1 2 3; do echo "/backdrop/screen0/monitor$m/workspace$w/last-image"; done; done)
+for p in $PROPS; do
+    xfconf-query -c xfce4-desktop -p "$p" -n -t string -s "$P"
+    xfconf-query -c xfce4-desktop -p "${p%/last-image}/image-style" -n -t int -s 5   # photos: fill the screen
+done

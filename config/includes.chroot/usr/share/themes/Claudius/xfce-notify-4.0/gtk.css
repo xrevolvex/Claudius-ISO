@@ -1,0 +1,10 @@
+/* Claudius notification bubbles */
+#XfceNotifyWindow { background-color: #161c36; border: 1px solid #2a3462; border-radius: 14px; padding: 4px; }
+#XfceNotifyWindow:hover { background-color: #1b2347; }
+#XfceNotifyWindow label#summary { font-weight: bold; color: #ffffff; }
+#XfceNotifyWindow label#body { color: #c8cde0; }
+#XfceNotifyWindow button { background-image: none; background-color: #1d2546; color: #e6e9f2;
+                           border: 1px solid #2a3462; border-radius: 8px; box-shadow: none; text-shadow: none; }
+#XfceNotifyWindow button:hover { background-color: #263063; }
+#XfceNotifyWindow progressbar progress { background-color: #ff9447; border: none; }
+#XfceNotifyWindow progressbar trough { background-color: #0f1530; border: none; }

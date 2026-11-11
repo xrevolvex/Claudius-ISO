@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Claudius Launcher
+GenericName=Search
+Comment=Search apps, files and settings
+Exec=claudius-launcher
+Icon=system-search
+Terminal=false
+Categories=Utility;
+StartupNotify=true

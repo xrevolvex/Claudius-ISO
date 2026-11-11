@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Security Center
+GenericName=Firewall and security
+Comment=Firewall, encryption, permissions and recommendations
+Exec=claudius-center --page security
+Icon=security-high
+Terminal=false
+Categories=System;Settings;Security;
+StartupNotify=true

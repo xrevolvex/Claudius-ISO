@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Capture
+GenericName=Screenshots and screen recording
+Comment=Screenshots with annotations and screen recording
+Exec=claudius-capture
+Icon=camera-photo
+Terminal=false
+Categories=Graphics;Utility;
+StartupNotify=true

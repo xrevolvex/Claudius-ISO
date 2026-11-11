@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Restore & Backup
+GenericName=Snapshots and backups
+Comment=System snapshots and personal file backups
+Exec=claudius-center --page backup
+Icon=document-revert
+Terminal=false
+Categories=System;
+StartupNotify=true

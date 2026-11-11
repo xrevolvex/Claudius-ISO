@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=System Monitor
+GenericName=Processes and resources
+Comment=CPU, memory, temperatures, processes and startup apps
+Exec=claudius-center --page monitor
+Icon=org.xfce.taskmanager
+Terminal=false
+Categories=System;Monitor;
+StartupNotify=true

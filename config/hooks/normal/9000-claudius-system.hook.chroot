@@ -7,8 +7,14 @@ set -e
 V="$CLAUDIUS_VERSION"; C="$CLAUDIUS_CODENAME"; U="$CLAUDIUS_URL"
 
 echo "I: [claudius] tools and services"
-chmod 755 /usr/bin/claudius /usr/bin/claudius-* /usr/lib/claudius/*
+chmod 755 /usr/bin/claudius /usr/bin/claudius-* /usr/lib/claudius/claudius-* /usr/lib/claudius/live-setup \
+          /usr/lib/claudius/update-check /usr/lib/claudius/*.py /usr/lib/claudius/center/app.py
 systemctl enable claudius-tune.service claudius-live.service
+systemctl --global enable claudius-update-check.timer || true
+# file search index for the Launcher (refreshed daily by plocate's timer)
+command -v updatedb >/dev/null && updatedb 2>/dev/null || true
+# compile the Claudius Python apps once, so they start faster
+python3 -m compileall -q /usr/lib/claudius >/dev/null 2>&1 || true
 
 echo "I: [claudius] boot animation"
 if [ -d /usr/share/plymouth/themes/claudius ]; then

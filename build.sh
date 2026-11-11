@@ -50,7 +50,7 @@ mkdir -p "$WORK" "$OUT"
 cd "$WORK"
 
 BOOT_APPEND="boot=live components quiet splash noeject \
-username=${CLAUDIUS_LIVE_USER} hostname=claudius \
+username=${CLAUDIUS_LIVE_USER} user-fullname=Claudius hostname=claudius \
 live-config.noautologin locales=en_US.UTF-8 keyboard-layouts=us"
 
 log "Configuring live-build"
