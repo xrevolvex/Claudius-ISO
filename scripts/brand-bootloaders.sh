@@ -70,6 +70,9 @@ for f in $(grep -rl '@APPEND_LIVE@' "$DST" 2>/dev/null); do
         }' "$f"
 done
 
+# ---- no start-up beep in the GRUB menu ------------------------------------------
+[ -d "$DST/grub-pc" ] && grep -rl '^insmod play\|^play ' "$DST/grub-pc" | xargs -r sed -i -e '/^insmod play/d' -e '/^play /d'
+
 # ---- shorter timeouts so VMs boot by themselves ---------------------------------
 for f in "$DST"/isolinux/isolinux.cfg "$DST"/syslinux_common/*.cfg; do
     [ -f "$f" ] && sed -i 's/^timeout .*/timeout 50/I' "$f"
@@ -82,7 +85,7 @@ if [ -d "$DST/grub-pc" ]; then
     fi
 fi
 
-echo "--- branded menu entries:"
-grep -rh -E 'menu label|menuentry' "$DST" 2>/dev/null | head -20 || true
+echo "--- live menu templates after branding:"
+for f in "$DST"/syslinux_common/live.cfg.in "$DST"/grub-pc/grub.cfg; do echo "== $f"; cat "$f" 2>/dev/null; done
 echo "--- isolinux.cfg:"; cat "$DST/isolinux/isolinux.cfg" 2>/dev/null || true
 echo "--- grub config.cfg/theme:"; cat "$DST/grub-pc/config.cfg" "$DST/grub-pc/theme.cfg" 2>/dev/null || true

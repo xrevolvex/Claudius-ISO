@@ -86,11 +86,12 @@ jobs:
           EOF
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
           sleep 3
+          FILES=("$ISO" "$ISO.sha256" out/build.log.gz)
+          for f in out/packages.txt out/screenshots/*.png; do [ -f "$f" ] && FILES+=("$f"); done
+          echo "Uploading: ${FILES[*]}"
           gh release create "$TAG" --title "Claudius ${{ steps.v.outputs.version }} ${{ steps.v.outputs.codename }}" \
-             --notes-file notes.md --latest \
-             "$ISO" "$ISO.sha256" out/build.log.gz out/screenshots/*.png out/packages.txt 2>/dev/null \
-          || gh release create "$TAG" --title "Claudius ${{ steps.v.outputs.version }} ${{ steps.v.outputs.codename }}" \
-             --notes-file notes.md --latest "$ISO" "$ISO.sha256" out/build.log.gz
+             --notes-file notes.md --latest "${FILES[@]}"
+          gh release delete ci-logs --yes --cleanup-tag 2>/dev/null || true
 
       - name: Publish logs when the build fails
         if: failure()
