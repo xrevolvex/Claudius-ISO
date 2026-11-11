@@ -60,6 +60,10 @@ cat > /etc/brave/policies/managed/claudius.json <<'EOF'
   "BraveP3AEnabled": false
 }
 EOF
+# New users skip Brave's own welcome tab: the policies above already set the start page
+mkdir -p "/etc/skel/.config/BraveSoftware/Brave-Browser"
+touch "/etc/skel/.config/BraveSoftware/Brave-Browser/First Run"
+
 # a short name in menus and launchers
 DESK=/usr/share/applications/brave-browser.desktop
 if [ -f "$DESK" ]; then
