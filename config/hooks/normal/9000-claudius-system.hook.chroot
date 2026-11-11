@@ -88,6 +88,8 @@ if [ -f /etc/calamares/settings.conf ]; then
 fi
 # Debian's own "Install Debian" launcher is replaced by "Install Claudius"
 rm -f /usr/share/applications/install-debian.desktop /usr/share/applications/calamares.desktop \
+      /usr/share/applications/calamares-install-debian.desktop \
+      /etc/xdg/autostart/calamares-desktop-icon.desktop \
       /etc/skel/Desktop/install-debian.desktop 2>/dev/null || true
 
 # ---------------------------------------------------------------- GRUB on the installed system

@@ -24,6 +24,10 @@ log() { printf '\n\033[1;33m==> %s\033[0m\n' "$*"; }
 
 [ "$(id -u)" -eq 0 ] || { echo "build.sh must run as root (try: sudo ./build.sh)"; exit 1; }
 
+# Everything from here on also goes to out/build.log
+mkdir -p "$OUT"
+exec > >(tee "$OUT/build.log") 2>&1
+
 # -----------------------------------------------------------------------------
 log "Installing build dependencies"
 # -----------------------------------------------------------------------------
@@ -34,7 +38,7 @@ if [ "${SKIP_DEPS:-0}" != "1" ]; then
         live-build debootstrap squashfs-tools xorriso \
         grub-pc-bin grub-efi-amd64-bin grub-efi-amd64-signed shim-signed mtools dosfstools \
         syslinux syslinux-common isolinux librsvg2-bin \
-        rsync ca-certificates cpio zstd xz-utils
+        rsync ca-certificates cpio zstd xz-utils apt-utils perl
 fi
 
 # -----------------------------------------------------------------------------
@@ -103,7 +107,7 @@ EOF
 # -----------------------------------------------------------------------------
 log "Building (this takes a while)"
 # -----------------------------------------------------------------------------
-lb build 2>&1 | tee "$OUT/build.log"
+lb build
 
 ISO_SRC="$(ls -1 "$WORK"/*.iso 2>/dev/null | head -n1 || true)"
 if [ -z "$ISO_SRC" ]; then
