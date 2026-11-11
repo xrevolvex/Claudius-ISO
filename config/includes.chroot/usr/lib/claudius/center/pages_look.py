@@ -20,7 +20,7 @@ CLAUDIUS_SHORTCUTS = {
     "record": ("Start / stop screen recording", "claudius-capture --record-toggle", "<Super><Shift>r"),
     "terminal": ("Terminal", "xfce4-terminal", "<Primary><Alt>t"),
     "files": ("Files", "thunar", "<Super>e"),
-    "browser": ("Web browser", "firefox-esr", "<Super>b"),
+    "browser": ("Web browser (Brave)", "brave-browser", "<Super>b"),
     "center": ("Claudius Center", "claudius-center", "<Super>i"),
     "monitor": ("System Monitor", "claudius-center --page monitor", "<Primary><Shift>Escape"),
 }
@@ -358,7 +358,7 @@ class PerformancePage(Page):
     def build(self):
         t = C.read_kv("/run/claudius/tune")
         self.put(C.label(f"Active now: {t.get('PROFILE', '?')} · {t.get('MEM_MB', '?')} MB RAM · {t.get('CPUS', '?')} CPUs · "
-                         f"zram {t.get('ZRAM_PERCENT', '?')} % · {t.get('FIREFOX_PROCESSES', '?')} Firefox processes", "h2"))
+                         f"zram {t.get('ZRAM_PERCENT', '?')} % · {t.get('FIREFOX_PROCESSES', '?')} browser processes", "h2"))
         try:
             want = open("/etc/claudius/profile").read().strip()
         except OSError:

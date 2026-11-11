@@ -3,6 +3,7 @@ name: Build Claudius ISO
 on:
   push:
     branches: [main]
+    tags: ["v*"]
     paths-ignore: ["**.md", "docs/**", "LICENSE"]
   workflow_dispatch:
 
@@ -66,15 +67,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="v${{ steps.v.outputs.version }}"
+          VER="${{ steps.v.outputs.version }}"; CODE="${{ steps.v.outputs.codename }}"
           ISO="${{ steps.iso.outputs.path }}"
+          if [ "${GITHUB_REF_TYPE}" = tag ]; then
+            # a pushed tag (for example v1.0) is an official release
+            TAG="${GITHUB_REF_NAME}"; KIND="--latest"; TITLE="Claudius ${TAG#v} ${CODE}"
+          else
+            # every build on main is a numbered pre-release
+            TAG="v${VER}-build.${{ github.run_number }}"; KIND="--prerelease"; TITLE="Claudius ${VER} ${CODE}, build ${{ github.run_number }}"
+          fi
           gzip -kf out/build.log
           cat > notes.md <<EOF
-          ## Claudius ${{ steps.v.outputs.version }} "${{ steps.v.outputs.codename }}"
+          ## ${TITLE}
 
-          Build #${{ github.run_number }} from commit ${GITHUB_SHA::7}. Boot test: **${{ steps.boot.outcome }}**.
+          From commit ${GITHUB_SHA::7}. Automatic boot test: **${{ steps.boot.outcome }}** (screenshots below).
 
-          **Download** \`$(basename "$ISO")\` below and follow the [VirtualBox guide](https://github.com/${{ github.repository }}/blob/main/docs/VIRTUALBOX.md).
+          **Download** \`$(basename "$ISO")\` and follow the [VirtualBox guide](https://github.com/${{ github.repository }}/blob/main/docs/VIRTUALBOX.md).
 
           | | |
           |---|---|
@@ -82,16 +90,17 @@ jobs:
           | Recommended VM | 8 GB RAM, 2+ CPUs, VMSVGA graphics with 3D acceleration, 25 GB disk |
           | Minimum VM | 2 GB RAM, 1 CPU |
 
-          The \`*.png\` files are screenshots taken automatically while this exact ISO booted in a virtual machine.
+          Pre-releases are test builds of the newest code. The release marked **Latest** is the stable one.
           EOF
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
-          sleep 3
+          sleep 2
           FILES=("$ISO" "$ISO.sha256" out/build.log.gz)
           for f in out/packages.txt out/screenshots/*.png; do [ -f "$f" ] && FILES+=("$f"); done
-          echo "Uploading: ${FILES[*]}"
-          gh release create "$TAG" --title "Claudius ${{ steps.v.outputs.version }} ${{ steps.v.outputs.codename }}" \
-             --notes-file notes.md --latest "${FILES[@]}"
+          gh release create "$TAG" --title "$TITLE" --notes-file notes.md $KIND --target "$GITHUB_SHA" "${FILES[@]}"
           gh release delete ci-logs --yes --cleanup-tag 2>/dev/null || true
+          # keep only the 5 newest build pre-releases
+          gh release list --limit 100 --json tagName,isPrerelease -q '.[] | select(.isPrerelease) | .tagName' \
+            | grep -- '-build\.' | tail -n +6 | while read -r old; do gh release delete "$old" --yes --cleanup-tag || true; done
 
       - name: Publish logs when the build fails
         if: failure()

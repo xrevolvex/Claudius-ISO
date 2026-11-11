@@ -1,0 +1,6 @@
+#!/bin/sh
+# Start Brave with the flags claudius-tune chose for this machine's RAM.
+FLAGS=""
+[ -r /run/claudius/brave-flags ] && FLAGS=$(cat /run/claudius/brave-flags)
+# shellcheck disable=SC2086
+exec /usr/bin/brave-browser-stable $FLAGS "$@"

@@ -1,0 +1,70 @@
+#!/bin/sh
+# =============================================================================
+#  Brave browser: Claudius' default browser.
+#  Installed from Brave's official apt repository (Brave is not in Debian), so
+#  the Update Center keeps it up to date on installed systems.
+# =============================================================================
+set -e
+echo "I: [claudius] installing Brave"
+KEYRING=/usr/share/keyrings/brave-browser-archive-keyring.gpg
+curl -fsSLo "$KEYRING" https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+cat > /etc/apt/sources.list.d/brave-browser-release.sources <<EOF
+Types: deb
+URIs: https://brave-browser-apt-release.s3.brave.com/
+Suites: stable
+Components: main
+Architectures: amd64
+Signed-By: $KEYRING
+EOF
+apt-get update -qq
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends brave-browser
+
+# ---- Claudius defaults: start page, privacy, no first-run screens -------------
+BRAVE_DIR=$(dirname "$(readlink -f /usr/bin/brave-browser)")
+cat > "$BRAVE_DIR/initial_preferences" <<'EOF'
+{
+  "distribution": {
+    "skip_first_run_ui": true,
+    "import_bookmarks": false,
+    "import_history": false,
+    "import_search_engine": false,
+    "make_chrome_default": false,
+    "make_chrome_default_for_user": false,
+    "suppress_first_run_default_browser_prompt": true,
+    "suppress_first_run_bubble": true
+  },
+  "first_run_tabs": ["file:///usr/share/claudius/start/index.html"],
+  "homepage": "file:///usr/share/claudius/start/index.html",
+  "homepage_is_newtabpage": false,
+  "browser": { "show_home_button": true, "check_default_browser": false, "theme": { "color_scheme": 2 } },
+  "session": { "restore_on_startup": 4, "startup_urls": ["file:///usr/share/claudius/start/index.html"] },
+  "brave": { "new_tab_page": { "show_background_image": false, "show_branded_background_image": false } }
+}
+EOF
+mkdir -p /etc/brave/policies/managed
+cat > /etc/brave/policies/managed/claudius.json <<'EOF'
+{
+  "HomepageLocation": "file:///usr/share/claudius/start/index.html",
+  "HomepageIsNewTabPage": false,
+  "ShowHomeButton": true,
+  "RestoreOnStartup": 4,
+  "RestoreOnStartupURLs": ["file:///usr/share/claudius/start/index.html"],
+  "DefaultBrowserSettingEnabled": false,
+  "MetricsReportingEnabled": false,
+  "PromotionalTabsEnabled": false,
+  "BraveRewardsDisabled": true,
+  "BraveWalletDisabled": true,
+  "BraveVPNDisabled": true,
+  "BraveStatsPingEnabled": false,
+  "BraveWebDiscoveryEnabled": false,
+  "BraveP3AEnabled": false
+}
+EOF
+# a short name in menus and launchers
+DESK=/usr/share/applications/brave-browser.desktop
+if [ -f "$DESK" ]; then
+    sed -i 's/^Name=Brave Web Browser$/Name=Brave/' "$DESK"
+    # start through /usr/local/bin/brave-browser, which adds the RAM-profile flags
+    sed -i 's#^Exec=/usr/bin/brave-browser-stable#Exec=/usr/local/bin/brave-browser#' "$DESK"
+fi
+echo "   Brave $(dpkg-query -W -f='${Version}' brave-browser) installed in $BRAVE_DIR"

@@ -30,7 +30,7 @@ Select the VM → **Settings**:
 
 - **System → Processor:** tick **Enable PAE/NX**
 - **System → Acceleration:** Paravirtualization **KVM**, keep **Nested Paging** on
-- **Display → Screen:** Graphics Controller **VMSVGA**, Video Memory **256 MB** (the maximum), tick **Enable 3D Acceleration**. That gives Claudius real GPU drawing, which makes window effects, Firefox and high refresh rates smooth. If you ever get a black screen, untick it
+- **Display → Screen:** Graphics Controller **VMSVGA**, Video Memory **256 MB** (the maximum), tick **Enable 3D Acceleration**. That gives Claudius real GPU drawing, which makes window effects, Brave and high refresh rates smooth. If you ever get a black screen, untick it
 - **Storage:** controller **SATA (AHCI)**, and tick **Use Host I/O Cache** on the controller. On the disk itself tick **Solid-state Drive** if your PC has an SSD
 - **Audio:** Host Audio Driver *Default*, Controller *Intel HD Audio*
 - **Network:** Adapter 1 **NAT** (internet works out of the box)

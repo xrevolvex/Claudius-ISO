@@ -88,6 +88,14 @@ for d in /usr/lib/firefox-esr/distribution /etc/firefox/policies /etc/firefox-es
     mkdir -p "$d"; cp /usr/share/claudius/firefox/policies.json "$d/policies.json"
 done
 
+# Brave is the system web browser
+if [ -x /usr/bin/brave-browser ]; then
+    update-alternatives --set x-www-browser /usr/bin/brave-browser-stable 2>/dev/null || true
+    update-alternatives --set gnome-www-browser /usr/bin/brave-browser-stable 2>/dev/null || true
+    mkdir -p /etc/xdg/xfce4
+    printf 'WebBrowser=brave\n' > /etc/xdg/xfce4/helpers.rc
+fi
+
 echo "I: [claudius] installer"
 # ---------------------------------------------------------------- Calamares
 if [ -f /etc/calamares/settings.conf ]; then
@@ -130,9 +138,10 @@ for f in /etc/xdg/mimeapps.list /usr/share/applications/mimeapps.list; do
 [Default Applications]
 text/x-python3=$THONNY;claudius-run-python.desktop;
 text/x-python=$THONNY;claudius-run-python.desktop;
-text/html=firefox-esr.desktop
-x-scheme-handler/http=firefox-esr.desktop
-x-scheme-handler/https=firefox-esr.desktop
+text/html=brave-browser.desktop
+x-scheme-handler/http=brave-browser.desktop
+x-scheme-handler/https=brave-browser.desktop
+application/xhtml+xml=brave-browser.desktop
 application/pdf=atril.desktop
 inode/directory=thunar.desktop
 

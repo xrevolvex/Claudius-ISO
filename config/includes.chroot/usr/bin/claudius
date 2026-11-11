@@ -42,7 +42,7 @@ case "${1:-}" in
     ram|mem|memory)
         [ -r /run/claudius/tune ] && . /run/claudius/tune
         echo
-        echo "  ${B}Profile:${R} ${A}${PROFILE:-unknown}${R}   ${D}(${MEM_MB:-?} MB RAM, ${CPUS:-?} CPUs, zram ${ZRAM_PERCENT:-?}%, Firefox processes ${FIREFOX_PROCESSES:-?})${R}"
+        echo "  ${B}Profile:${R} ${A}${PROFILE:-unknown}${R}   ${D}(${MEM_MB:-?} MB RAM, ${CPUS:-?} CPUs, zram ${ZRAM_PERCENT:-?}%, browser processes ${FIREFOX_PROCESSES:-?})${R}"
         echo
         free -h
         echo
@@ -54,7 +54,7 @@ case "${1:-}" in
             case "$2" in auto|lite|balanced|performance) ;; *) echo "use: auto, lite, balanced or performance"; exit 1 ;; esac
             sudo mkdir -p /etc/claudius && echo "$2" | sudo tee /etc/claudius/profile >/dev/null
             sudo /usr/bin/claudius-tune
-            echo "Saved. Some settings (window effects, Firefox) apply after you log out and back in."
+            echo "Saved. Some settings (window effects, the browser) apply after you log out and back in."
         else
             [ -r /run/claudius/tune ] && cat /run/claudius/tune
         fi ;;

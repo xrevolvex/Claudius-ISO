@@ -37,7 +37,7 @@ xq -c xfce4-keyboard-shortcuts -p "$K/<Alt>Print"              -n -t string -s '
 xq -c xfce4-keyboard-shortcuts -p "$K/<Super><Shift>r"         -n -t string -s 'claudius-capture --record-toggle'
 xq -c xfce4-keyboard-shortcuts -p "$K/<Primary><Alt>t"         -n -t string -s xfce4-terminal
 xq -c xfce4-keyboard-shortcuts -p "$K/<Super>e"                -n -t string -s thunar
-xq -c xfce4-keyboard-shortcuts -p "$K/<Super>b"                -n -t string -s firefox-esr
+xq -c xfce4-keyboard-shortcuts -p "$K/<Super>b"                -n -t string -s brave-browser
 xq -c xfce4-keyboard-shortcuts -p "$K/<Primary><Shift>Escape"  -n -t string -s 'claudius-center --page monitor'
 # Super+Arrows tile windows
 for k in Left:tile_left_key Right:tile_right_key Up:maximize_window_key Down:hide_window_key; do

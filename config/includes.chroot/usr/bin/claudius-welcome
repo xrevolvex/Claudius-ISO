@@ -111,7 +111,7 @@ class Welcome(Gtk.Window):
         # ---- tiles -----------------------------------------------------------
         grid = Gtk.Grid(column_spacing=12, row_spacing=12, margin=22, column_homogeneous=True)
         tiles = [
-            ("firefox-esr", "Browse the web", "Firefox with a Claudius start page", ["firefox-esr"]),
+            ("brave-browser", "Browse the web", "Brave with a Claudius start page", ["brave-browser"]),
             ("system-file-manager", "Your files", "Folders, USB drives and Trash", ["thunar"]),
             ("utilities-terminal", "Terminal", "Type  claudius  to see shortcuts", ["xfce4-terminal"]),
             ("thonny", "Python", "Write and run scripts in Thonny", ["thonny", os.path.expanduser("~/Python/hello.py")]),

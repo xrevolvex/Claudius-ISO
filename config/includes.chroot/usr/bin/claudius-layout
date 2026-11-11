@@ -52,7 +52,7 @@ dock_on() {
     local D="$HOME/.config/plank/dock1/launchers"
     if [ ! -d "$D" ] || [ -z "$(ls -A "$D" 2>/dev/null)" ]; then
         mkdir -p "$D"
-        for app in firefox-esr thunar xfce4-terminal libreoffice-writer vlc org.thonny.Thonny claudius-center; do
+        for app in brave-browser thunar xfce4-terminal libreoffice-writer vlc org.thonny.Thonny claudius-center; do
             [ -f "/usr/share/applications/$app.desktop" ] && printf '[PlankDockItemPreferences]\nLauncher=file:///usr/share/applications/%s.desktop\n' "$app" > "$D/$app.dockitem"
         done
     fi

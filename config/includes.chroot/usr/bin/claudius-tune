@@ -73,7 +73,14 @@ for q in /sys/block/sd*/queue/scheduler /sys/block/vd*/queue/scheduler /sys/bloc
     [ -w "$q" ] && echo none > "$q" 2>/dev/null || true
 done
 
-# ---- Firefox ----------------------------------------------------------------------
+# ---- Brave (via /usr/local/bin/brave-browser) --------------------------------------
+case "$PROFILE" in
+    lite)        echo "--renderer-process-limit=2 --disk-cache-size=52428800" > /run/claudius/brave-flags ;;
+    balanced)    echo "--renderer-process-limit=4" > /run/claudius/brave-flags ;;
+    performance) echo "" > /run/claudius/brave-flags ;;
+esac
+
+# ---- Firefox (if installed from the App Center) ---------------------------------
 for d in /usr/lib/firefox-esr/defaults/pref /etc/firefox-esr; do
     [ -d "$d" ] || continue
     cat > "$d/claudius-adaptive.js" 2>/dev/null <<EOF || true
@@ -93,8 +100,8 @@ X=/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml
 if [ "$PROFILE" = performance ]; then
     (
         sleep 20
-        for f in /usr/lib/firefox-esr/libxul.so /usr/lib/firefox-esr/omni.ja \
-                 /usr/lib/firefox-esr/browser/omni.ja /usr/lib/libreoffice/program/libmergedlo.so \
+        for f in /opt/brave.com/brave/brave /opt/brave.com/brave/resources.pak /opt/brave.com/brave/libGLESv2.so \
+                 /usr/lib/libreoffice/program/libmergedlo.so \
                  /usr/bin/thunar /usr/bin/xfce4-terminal; do
             [ -r "$f" ] && nice -n 19 ionice -c3 cat "$f" > /dev/null 2>&1
         done

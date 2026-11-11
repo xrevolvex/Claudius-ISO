@@ -9,7 +9,9 @@ A Debian-based Linux desktop that tunes itself to the machine it runs on, from a
 <p align="center">
   <a href="../../releases/latest"><b>Download the ISO</b></a> ·
   <a href="docs/VIRTUALBOX.md">Run it in VirtualBox</a> ·
-  <a href="docs/BUILDING.md">Build it yourself</a>
+  <a href="docs/BUILDING.md">Build it yourself</a> ·
+  <a href="docs/RELEASING.md">Releases</a> ·
+  <a href="ROADMAP.md">Roadmap</a>
 </p>
 
 ---
@@ -21,7 +23,7 @@ A Debian-based Linux desktop that tunes itself to the machine it runs on, from a
 | **Desktop** | XFCE with a Windows-style taskbar, a start menu (press <kbd>Super</kbd>), a live CPU/RAM meter and a dark Arc theme with Papirus icons |
 | **Boot and login** | A boot animation where the Claudius C draws itself, then the login card fades in. After you log in the C glides into place on the wallpaper as the desktop appears. Live login: `claudius` / `claudius` |
 | **Display** | Picks the best resolution and the highest refresh rate (144 Hz in VMs, whatever your monitor offers on real hardware). `claudius refresh 144` |
-| **Web** | Firefox ESR with a fast, private Claudius start page, telemetry off |
+| **Web** | **Brave** (blocks ads and trackers) with a fast Claudius start page; rewards, wallet, VPN and telemetry switched off. Firefox is one click away in the App Center |
 | **Office and media** | LibreOffice Writer, Calc and Impress, VLC, a PDF viewer, an image viewer, a text and code editor (Mousepad, Geany) |
 | **Files** | Thunar file manager, archive support (zip, 7z, tar), USB drives, Trash |
 | **Terminal** | xfce4-terminal with a Claudius colour scheme, a custom prompt, a system card at startup, and the `claudius` helper command |
@@ -49,7 +51,7 @@ At every boot, `claudius-tune` checks how much RAM and CPU the machine has and p
 |---|---|---|
 | **lite** | under 3 GB | large compressed swap in RAM (zram, 75 %), 2 browser processes, no window effects |
 | **balanced** | 3 to 6 GB | zram 50 %, 4 browser processes |
-| **performance** | 6 GB and up | zram 25 %, 8 browser processes, a 512 MB browser memory cache, window effects on, and Firefox/LibreOffice preloaded into RAM so they open instantly |
+| **performance** | 6 GB and up | zram 25 %, 8 browser processes, a 512 MB browser memory cache, window effects on, and Brave/LibreOffice preloaded into RAM so they open instantly |
 
 Also included: no Bluetooth, printing or modem services, no boot splash daemon, I/O scheduling tuned for virtual disks, journald capped in size, and a **"Start Claudius in RAM"** boot entry that copies the whole system into memory (4 GB+). On an 8 GB VM that makes every app launch close to instant.
 
@@ -99,7 +101,7 @@ tests/boot-test.sh          boots the ISO in QEMU and takes screenshots
 .github/workflows/          GitHub Actions: build, test and release on every push
 ```
 
-Every push to `main` builds the ISO on GitHub Actions and boots it in QEMU (BIOS with 8 GB, UEFI with 2 GB). It logs in, opens a terminal and Firefox, screenshots each step, and publishes the ISO and screenshots as a release.
+Every push to `main` builds the ISO on GitHub Actions and boots it in QEMU (BIOS with 8 GB, UEFI with 2 GB). It logs in, opens a terminal, Claudius Center, Quick Settings, the Launcher and Brave, screenshots each step, and publishes the ISO and screenshots as a release.
 
 ## License
 

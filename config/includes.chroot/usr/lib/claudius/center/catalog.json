@@ -1,58 +1,385 @@
 {
-  "categories": ["Essentials", "Internet", "Office", "Graphics", "Media", "Development", "Games", "Utilities"],
-  "apps": [
-    {"name": "Firefox", "summary": "Fast, private web browser", "icon": "firefox-esr", "apt": "firefox-esr", "category": "Internet", "essential": true},
-    {"name": "Chromium", "summary": "Open-source web browser from Google", "icon": "chromium", "apt": "chromium", "category": "Internet"},
-    {"name": "Thunderbird", "summary": "Email, calendar and contacts", "icon": "thunderbird", "apt": "thunderbird", "category": "Internet", "essential": true},
-    {"name": "Discord", "summary": "Voice, video and text chat", "icon": "discord", "flatpak": "com.discordapp.Discord", "category": "Internet"},
-    {"name": "Telegram", "summary": "Fast, secure messaging", "icon": "telegram", "flatpak": "org.telegram.desktop", "category": "Internet"},
-    {"name": "Signal", "summary": "Private messenger", "icon": "signal-desktop", "flatpak": "org.signal.Signal", "category": "Internet"},
-    {"name": "Transmission", "summary": "Simple BitTorrent client", "icon": "transmission", "apt": "transmission-gtk", "category": "Internet"},
-    {"name": "FileZilla", "summary": "FTP and SFTP file transfer", "icon": "filezilla", "apt": "filezilla", "category": "Internet"},
-    {"name": "LibreOffice", "summary": "Documents, spreadsheets and presentations", "icon": "libreoffice-startcenter", "apt": "libreoffice-writer", "category": "Office", "essential": true},
-    {"name": "OnlyOffice", "summary": "Office suite compatible with Microsoft formats", "icon": "onlyoffice-desktopeditors", "flatpak": "org.onlyoffice.desktopeditors", "category": "Office"},
-    {"name": "Obsidian", "summary": "Notes and knowledge base", "icon": "obsidian", "flatpak": "md.obsidian.Obsidian", "category": "Office"},
-    {"name": "Okular", "summary": "Document and PDF viewer with annotations", "icon": "okular", "apt": "okular", "category": "Office"},
-    {"name": "GIMP", "summary": "Photo editing and painting", "icon": "gimp", "apt": "gimp", "category": "Graphics", "essential": true},
-    {"name": "Inkscape", "summary": "Vector graphics", "icon": "inkscape", "apt": "inkscape", "category": "Graphics"},
-    {"name": "Krita", "summary": "Digital painting", "icon": "krita", "apt": "krita", "category": "Graphics"},
-    {"name": "Blender", "summary": "3D modelling and animation", "icon": "blender", "flatpak": "org.blender.Blender", "category": "Graphics"},
-    {"name": "Darktable", "summary": "Photo workflow and RAW developer", "icon": "darktable", "apt": "darktable", "category": "Graphics"},
-    {"name": "VLC", "summary": "Plays every video and audio format", "icon": "vlc", "apt": "vlc", "category": "Media", "essential": true},
-    {"name": "Spotify", "summary": "Music streaming", "icon": "spotify", "flatpak": "com.spotify.Client", "category": "Media"},
-    {"name": "OBS Studio", "summary": "Streaming and screen recording", "icon": "com.obsproject.Studio", "apt": "obs-studio", "category": "Media"},
-    {"name": "Audacity", "summary": "Record and edit audio", "icon": "audacity", "apt": "audacity", "category": "Media"},
-    {"name": "Kdenlive", "summary": "Video editor", "icon": "kdenlive", "apt": "kdenlive", "category": "Media"},
-    {"name": "Rhythmbox", "summary": "Music library player", "icon": "rhythmbox", "apt": "rhythmbox", "category": "Media"},
-    {"name": "VS Code", "summary": "Code editor from Microsoft", "icon": "com.visualstudio.code", "flatpak": "com.visualstudio.code", "category": "Development", "essential": true},
-    {"name": "VSCodium", "summary": "VS Code without telemetry", "icon": "com.vscodium.codium", "flatpak": "com.vscodium.codium", "category": "Development"},
-    {"name": "Thonny", "summary": "Beginner-friendly Python IDE", "icon": "thonny", "apt": "thonny", "category": "Development"},
-    {"name": "Geany", "summary": "Light, fast code editor", "icon": "geany", "apt": "geany", "category": "Development"},
-    {"name": "Git GUI (gitg)", "summary": "Browse Git repositories", "icon": "org.gnome.gitg", "apt": "gitg", "category": "Development"},
-    {"name": "Meld", "summary": "Compare files and folders", "icon": "org.gnome.meld", "apt": "meld", "category": "Development"},
-    {"name": "Steam", "summary": "Games store and launcher", "icon": "steam", "flatpak": "com.valvesoftware.Steam", "category": "Games"},
-    {"name": "Lutris", "summary": "Play games from every store", "icon": "lutris", "flatpak": "net.lutris.Lutris", "category": "Games"},
-    {"name": "SuperTuxKart", "summary": "Kart racing", "icon": "supertuxkart", "apt": "supertuxkart", "category": "Games"},
-    {"name": "Minecraft (Prism)", "summary": "Minecraft launcher", "icon": "org.prismlauncher.PrismLauncher", "flatpak": "org.prismlauncher.PrismLauncher", "category": "Games"},
-    {"name": "Aisleriot", "summary": "Solitaire card games", "icon": "gnome-aisleriot", "apt": "aisleriot", "category": "Games"},
-    {"name": "KeePassXC", "summary": "Password manager", "icon": "keepassxc", "apt": "keepassxc", "category": "Utilities", "essential": true},
-    {"name": "Timeshift", "summary": "System snapshots and restore", "icon": "timeshift", "apt": "timeshift", "category": "Utilities"},
-    {"name": "BleachBit", "summary": "Free disk space and clean privacy traces", "icon": "bleachbit", "apt": "bleachbit", "category": "Utilities"},
-    {"name": "Remmina", "summary": "Remote desktop client (RDP, VNC)", "icon": "org.remmina.Remmina", "apt": "remmina", "category": "Utilities"},
-    {"name": "Virtual Machine Manager", "summary": "Run virtual machines", "icon": "virt-manager", "apt": "virt-manager", "category": "Utilities"},
-    {"name": "Bottles", "summary": "Run Windows apps", "icon": "com.usebottles.bottles", "flatpak": "com.usebottles.bottles", "category": "Utilities"}
-  ],
-  "packs": [
-    {"id": "dev", "name": "Developer", "icon": "applications-development", "summary": "Compilers, Git, Node.js, Docker and VS Code",
-     "apt": ["build-essential", "git", "git-lfs", "nodejs", "npm", "docker.io", "docker-compose", "python3-dev", "sqlite3", "jq"],
-     "flatpak": ["com.visualstudio.code"]},
-    {"id": "gaming", "name": "Gaming", "icon": "applications-games", "summary": "Steam, Wine for Windows games, GameMode and Lutris",
-     "apt": ["wine", "gamemode", "mangohud"], "flatpak": ["com.valvesoftware.Steam", "net.lutris.Lutris"]},
-    {"id": "vm", "name": "Virtual machines", "icon": "virt-manager", "summary": "QEMU/KVM with Virtual Machine Manager",
-     "apt": ["virt-manager", "qemu-system-x86", "libvirt-daemon-system", "ovmf"], "flatpak": []},
-    {"id": "remote", "name": "Remote desktop", "icon": "org.remmina.Remmina", "summary": "Remmina to connect to other PCs, and an optional RDP server",
-     "apt": ["remmina", "remmina-plugin-rdp", "remmina-plugin-vnc"], "flatpak": [], "xrdp": true},
-    {"id": "power", "name": "Power management", "icon": "battery", "summary": "TLP battery optimisation and PowerTOP (laptops)",
-     "apt": ["tlp", "tlp-rdw", "powertop"], "flatpak": []}
-  ]
+ "categories": [
+  "Essentials",
+  "Internet",
+  "Office",
+  "Graphics",
+  "Media",
+  "Development",
+  "Games",
+  "Utilities"
+ ],
+ "apps": [
+  {
+   "name": "Brave",
+   "summary": "Fast, private browser that blocks ads and trackers",
+   "icon": "brave-browser",
+   "apt": "brave-browser",
+   "category": "Internet",
+   "essential": true
+  },
+  {
+   "name": "Firefox",
+   "summary": "Mozilla's browser (Brave is the default)",
+   "icon": "firefox-esr",
+   "apt": "firefox-esr",
+   "category": "Internet",
+   "essential": false
+  },
+  {
+   "name": "Chromium",
+   "summary": "Open-source web browser from Google",
+   "icon": "chromium",
+   "apt": "chromium",
+   "category": "Internet"
+  },
+  {
+   "name": "Thunderbird",
+   "summary": "Email, calendar and contacts",
+   "icon": "thunderbird",
+   "apt": "thunderbird",
+   "category": "Internet",
+   "essential": true
+  },
+  {
+   "name": "Discord",
+   "summary": "Voice, video and text chat",
+   "icon": "discord",
+   "flatpak": "com.discordapp.Discord",
+   "category": "Internet"
+  },
+  {
+   "name": "Telegram",
+   "summary": "Fast, secure messaging",
+   "icon": "telegram",
+   "flatpak": "org.telegram.desktop",
+   "category": "Internet"
+  },
+  {
+   "name": "Signal",
+   "summary": "Private messenger",
+   "icon": "signal-desktop",
+   "flatpak": "org.signal.Signal",
+   "category": "Internet"
+  },
+  {
+   "name": "Transmission",
+   "summary": "Simple BitTorrent client",
+   "icon": "transmission",
+   "apt": "transmission-gtk",
+   "category": "Internet"
+  },
+  {
+   "name": "FileZilla",
+   "summary": "FTP and SFTP file transfer",
+   "icon": "filezilla",
+   "apt": "filezilla",
+   "category": "Internet"
+  },
+  {
+   "name": "LibreOffice",
+   "summary": "Documents, spreadsheets and presentations",
+   "icon": "libreoffice-startcenter",
+   "apt": "libreoffice-writer",
+   "category": "Office",
+   "essential": true
+  },
+  {
+   "name": "OnlyOffice",
+   "summary": "Office suite compatible with Microsoft formats",
+   "icon": "onlyoffice-desktopeditors",
+   "flatpak": "org.onlyoffice.desktopeditors",
+   "category": "Office"
+  },
+  {
+   "name": "Obsidian",
+   "summary": "Notes and knowledge base",
+   "icon": "obsidian",
+   "flatpak": "md.obsidian.Obsidian",
+   "category": "Office"
+  },
+  {
+   "name": "Okular",
+   "summary": "Document and PDF viewer with annotations",
+   "icon": "okular",
+   "apt": "okular",
+   "category": "Office"
+  },
+  {
+   "name": "GIMP",
+   "summary": "Photo editing and painting",
+   "icon": "gimp",
+   "apt": "gimp",
+   "category": "Graphics",
+   "essential": true
+  },
+  {
+   "name": "Inkscape",
+   "summary": "Vector graphics",
+   "icon": "inkscape",
+   "apt": "inkscape",
+   "category": "Graphics"
+  },
+  {
+   "name": "Krita",
+   "summary": "Digital painting",
+   "icon": "krita",
+   "apt": "krita",
+   "category": "Graphics"
+  },
+  {
+   "name": "Blender",
+   "summary": "3D modelling and animation",
+   "icon": "blender",
+   "flatpak": "org.blender.Blender",
+   "category": "Graphics"
+  },
+  {
+   "name": "Darktable",
+   "summary": "Photo workflow and RAW developer",
+   "icon": "darktable",
+   "apt": "darktable",
+   "category": "Graphics"
+  },
+  {
+   "name": "VLC",
+   "summary": "Plays every video and audio format",
+   "icon": "vlc",
+   "apt": "vlc",
+   "category": "Media",
+   "essential": true
+  },
+  {
+   "name": "Spotify",
+   "summary": "Music streaming",
+   "icon": "spotify",
+   "flatpak": "com.spotify.Client",
+   "category": "Media"
+  },
+  {
+   "name": "OBS Studio",
+   "summary": "Streaming and screen recording",
+   "icon": "com.obsproject.Studio",
+   "apt": "obs-studio",
+   "category": "Media"
+  },
+  {
+   "name": "Audacity",
+   "summary": "Record and edit audio",
+   "icon": "audacity",
+   "apt": "audacity",
+   "category": "Media"
+  },
+  {
+   "name": "Kdenlive",
+   "summary": "Video editor",
+   "icon": "kdenlive",
+   "apt": "kdenlive",
+   "category": "Media"
+  },
+  {
+   "name": "Rhythmbox",
+   "summary": "Music library player",
+   "icon": "rhythmbox",
+   "apt": "rhythmbox",
+   "category": "Media"
+  },
+  {
+   "name": "VS Code",
+   "summary": "Code editor from Microsoft",
+   "icon": "com.visualstudio.code",
+   "flatpak": "com.visualstudio.code",
+   "category": "Development",
+   "essential": true
+  },
+  {
+   "name": "VSCodium",
+   "summary": "VS Code without telemetry",
+   "icon": "com.vscodium.codium",
+   "flatpak": "com.vscodium.codium",
+   "category": "Development"
+  },
+  {
+   "name": "Thonny",
+   "summary": "Beginner-friendly Python IDE",
+   "icon": "thonny",
+   "apt": "thonny",
+   "category": "Development"
+  },
+  {
+   "name": "Geany",
+   "summary": "Light, fast code editor",
+   "icon": "geany",
+   "apt": "geany",
+   "category": "Development"
+  },
+  {
+   "name": "Git GUI (gitg)",
+   "summary": "Browse Git repositories",
+   "icon": "org.gnome.gitg",
+   "apt": "gitg",
+   "category": "Development"
+  },
+  {
+   "name": "Meld",
+   "summary": "Compare files and folders",
+   "icon": "org.gnome.meld",
+   "apt": "meld",
+   "category": "Development"
+  },
+  {
+   "name": "Steam",
+   "summary": "Games store and launcher",
+   "icon": "steam",
+   "flatpak": "com.valvesoftware.Steam",
+   "category": "Games"
+  },
+  {
+   "name": "Lutris",
+   "summary": "Play games from every store",
+   "icon": "lutris",
+   "flatpak": "net.lutris.Lutris",
+   "category": "Games"
+  },
+  {
+   "name": "SuperTuxKart",
+   "summary": "Kart racing",
+   "icon": "supertuxkart",
+   "apt": "supertuxkart",
+   "category": "Games"
+  },
+  {
+   "name": "Minecraft (Prism)",
+   "summary": "Minecraft launcher",
+   "icon": "org.prismlauncher.PrismLauncher",
+   "flatpak": "org.prismlauncher.PrismLauncher",
+   "category": "Games"
+  },
+  {
+   "name": "Aisleriot",
+   "summary": "Solitaire card games",
+   "icon": "gnome-aisleriot",
+   "apt": "aisleriot",
+   "category": "Games"
+  },
+  {
+   "name": "KeePassXC",
+   "summary": "Password manager",
+   "icon": "keepassxc",
+   "apt": "keepassxc",
+   "category": "Utilities",
+   "essential": true
+  },
+  {
+   "name": "Timeshift",
+   "summary": "System snapshots and restore",
+   "icon": "timeshift",
+   "apt": "timeshift",
+   "category": "Utilities"
+  },
+  {
+   "name": "BleachBit",
+   "summary": "Free disk space and clean privacy traces",
+   "icon": "bleachbit",
+   "apt": "bleachbit",
+   "category": "Utilities"
+  },
+  {
+   "name": "Remmina",
+   "summary": "Remote desktop client (RDP, VNC)",
+   "icon": "org.remmina.Remmina",
+   "apt": "remmina",
+   "category": "Utilities"
+  },
+  {
+   "name": "Virtual Machine Manager",
+   "summary": "Run virtual machines",
+   "icon": "virt-manager",
+   "apt": "virt-manager",
+   "category": "Utilities"
+  },
+  {
+   "name": "Bottles",
+   "summary": "Run Windows apps",
+   "icon": "com.usebottles.bottles",
+   "flatpak": "com.usebottles.bottles",
+   "category": "Utilities"
+  }
+ ],
+ "packs": [
+  {
+   "id": "dev",
+   "name": "Developer",
+   "icon": "applications-development",
+   "summary": "Compilers, Git, Node.js, Docker and VS Code",
+   "apt": [
+    "build-essential",
+    "git",
+    "git-lfs",
+    "nodejs",
+    "npm",
+    "docker.io",
+    "docker-compose",
+    "python3-dev",
+    "sqlite3",
+    "jq"
+   ],
+   "flatpak": [
+    "com.visualstudio.code"
+   ]
+  },
+  {
+   "id": "gaming",
+   "name": "Gaming",
+   "icon": "applications-games",
+   "summary": "Steam, Wine for Windows games, GameMode and Lutris",
+   "apt": [
+    "wine",
+    "gamemode",
+    "mangohud"
+   ],
+   "flatpak": [
+    "com.valvesoftware.Steam",
+    "net.lutris.Lutris"
+   ]
+  },
+  {
+   "id": "vm",
+   "name": "Virtual machines",
+   "icon": "virt-manager",
+   "summary": "QEMU/KVM with Virtual Machine Manager",
+   "apt": [
+    "virt-manager",
+    "qemu-system-x86",
+    "libvirt-daemon-system",
+    "ovmf"
+   ],
+   "flatpak": []
+  },
+  {
+   "id": "remote",
+   "name": "Remote desktop",
+   "icon": "org.remmina.Remmina",
+   "summary": "Remmina to connect to other PCs, and an optional RDP server",
+   "apt": [
+    "remmina",
+    "remmina-plugin-rdp",
+    "remmina-plugin-vnc"
+   ],
+   "flatpak": [],
+   "xrdp": true
+  },
+  {
+   "id": "power",
+   "name": "Power management",
+   "icon": "battery",
+   "summary": "TLP battery optimisation and PowerTOP (laptops)",
+   "apt": [
+    "tlp",
+    "tlp-rdw",
+    "powertop"
+   ],
+   "flatpak": []
+  }
+ ]
 }

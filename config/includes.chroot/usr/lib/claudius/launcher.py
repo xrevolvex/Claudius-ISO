@@ -26,7 +26,7 @@ from gi.repository import Gio  # noqa: E402
 
 CONF = os.path.join(C.CONFIG_DIR, "launcher.json")
 PIDFILE = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "claudius-launcher.pid")
-DEFAULT_PINS = ["firefox-esr.desktop", "thunar.desktop", "xfce4-terminal.desktop", "libreoffice-writer.desktop",
+DEFAULT_PINS = ["brave-browser.desktop", "thunar.desktop", "xfce4-terminal.desktop", "libreoffice-writer.desktop",
                 "org.thonny.Thonny.desktop", "claudius-center.desktop"]
 CENTER_PAGES = [  # (title, keywords, page)
     ("Appearance", "theme accent dark light wallpaper colour color", "appearance"),

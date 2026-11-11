@@ -1,6 +1,6 @@
 name: Boot test (published ISO)
 
-# Boots the ISO from the latest release in QEMU and adds the screenshots to that
+# Boots the ISO from the newest release (or pre-release) in QEMU and adds the screenshots to that
 # release. Runs on its own (about 10 minutes) whenever the tests change, or by hand.
 on:
   push:
@@ -26,10 +26,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          . ./claudius.conf
-          echo "TAG=v$CLAUDIUS_VERSION" >> "$GITHUB_ENV"
+          TAG=$(gh release list --limit 1 --json tagName -q '.[0].tagName')
+          echo "Testing release $TAG"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
           mkdir -p out
-          gh release download "v$CLAUDIUS_VERSION" --pattern '*.iso' --dir out
+          gh release download "$TAG" --pattern '*.iso' --dir out
           ls -la out
 
       - name: Install QEMU and enable KVM

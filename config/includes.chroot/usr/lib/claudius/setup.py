@@ -235,7 +235,7 @@ class Setup(Gtk.Window):
         p.pack_start(C.button("Check for updates now", lambda: C.launch(["claudius-center", "--page", "updates"])), False, False, 0)
 
     def page_privacy(self, p):
-        self.h(p, "Privacy", "Claudius collects nothing. Firefox telemetry and studies are already off.")
+        self.h(p, "Privacy", "Claudius collects nothing. Brave rewards, wallet, VPN and telemetry are already off.")
         gtk_ini = os.path.expanduser("~/.config/gtk-3.0/settings.ini")
 
         def set_recent(on):
@@ -263,7 +263,7 @@ class Setup(Gtk.Window):
             sw.connect("state-set", lambda _s, st, f=cb: f(st) or False)
             box.pack_end(sw, False, False, 0)
             p.pack_start(C.card(box, orientation=Gtk.Orientation.HORIZONTAL), False, False, 0)
-        p.pack_start(C.label("✔ Firefox: telemetry, studies and sponsored content are off. Search uses DuckDuckGo.", "ok", wrap=True),
+        p.pack_start(C.label("✔ Brave: ads and trackers are blocked, telemetry, rewards and wallet are off.", "ok", wrap=True),
                      False, False, 0)
 
     def page_look(self, p):

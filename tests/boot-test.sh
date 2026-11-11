@@ -60,11 +60,11 @@ login_and_explore() {  # login_and_explore <prefix> <with firefox: yes/no>
         pause 6;  shot "$p-9-quick-settings"
         ctl key esc; sleep 2
         ctl key meta_l; sleep 3
-        ctl type "fire"
+        ctl type "brav"
         pause 3;  shot "$p-10-launcher"
         ctl key esc; sleep 2
-        ctl type "firefox-esr &\n"
-        pause 40; shot "$p-11-firefox"
+        ctl type "brave-browser >/dev/null 2>&1 &\n"
+        pause 40; shot "$p-11-brave"
     else
         ctl type "claudius layout ubuntu\n"
         pause 14; shot "$p-6-ubuntu-layout"
