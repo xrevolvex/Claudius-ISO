@@ -7,8 +7,15 @@ set -e
 V="$CLAUDIUS_VERSION"; C="$CLAUDIUS_CODENAME"; U="$CLAUDIUS_URL"
 
 echo "I: [claudius] tools and services"
-chmod 755 /usr/bin/claudius /usr/bin/claudius-* /usr/lib/live/config/9990-claudius
-systemctl enable claudius-tune.service
+chmod 755 /usr/bin/claudius /usr/bin/claudius-* /usr/lib/claudius/*
+systemctl enable claudius-tune.service claudius-live.service
+
+echo "I: [claudius] boot animation"
+if [ -d /usr/share/plymouth/themes/claudius ]; then
+    plymouth-set-default-theme claudius || echo "   (could not set the plymouth theme)"
+    update-initramfs -u -k all || echo "   (initramfs update failed)"
+    echo "   plymouth theme: $(plymouth-set-default-theme)"
+fi
 
 echo "I: [claudius] identity"
 # ---------------------------------------------------------------- os-release
@@ -158,7 +165,7 @@ fi
 echo "I: [claudius] slimming for low RAM"
 # ---------------------------------------------------------------- remove services a VM desktop doesn't need
 for p in modemmanager bluez cups cups-daemon cups-browsed avahi-daemon exim4-base exim4-daemon-light \
-         xscreensaver plymouth; do
+         xscreensaver; do
     if dpkg -s "$p" >/dev/null 2>&1; then
         echo "   purging $p"
         apt-get purge -y "$p" >/dev/null 2>&1 || echo "   (could not purge $p)"

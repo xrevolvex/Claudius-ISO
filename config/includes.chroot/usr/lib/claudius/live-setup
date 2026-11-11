@@ -1,17 +1,22 @@
 #!/bin/sh
-# live-config component: Claudius live-session setup.
-# Runs at every boot of the live ISO only (live-config is not part of an
-# installed system). Sets the documented login password, puts "Install
-# Claudius" on the desktop and lets the live user run the installer.
+# Claudius live-session setup (claudius-live.service).
+# Runs at every boot of the live ISO only: the service has
+# ConditionPathExists=/run/live/medium, which an installed system never has.
+# Sets the documented login password, puts "Install Claudius" on the desktop
+# and lets the live user run the installer.
 
 Claudius_live ()
 {
-	_U="${LIVE_USERNAME:-claudius}"
+	_U=$(sed -n 's/.*\b\(live-config\.\)\?username=\([^ ]*\).*/\2/p' /proc/cmdline)
+	_U="${_U:-claudius}"
+	# wait (up to 30 s) for live-config to create the user
+	_n=0
+	while ! getent passwd "$_U" >/dev/null 2>&1 && [ $_n -lt 30 ]; do sleep 1; _n=$((_n + 1)); done
 	if ! getent passwd "$_U" >/dev/null 2>&1; then
 		return 0
 	fi
 
-	echo "$_U:claudius" | chpasswd
+	echo "$_U:claudius" | chpasswd && echo "claudius-live: password set for $_U"
 	usermod -c "Claudius Live (password: claudius)" "$_U" 2>/dev/null || true
 
 	# Login screen must ask for the password

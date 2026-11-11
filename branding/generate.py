@@ -70,88 +70,111 @@ def icon_svg():
     return svg(512, 512, bg + emblem(256, 262, 160))
 
 
-def background_layers(w, h, variant="desktop"):
-    """Shared gradient and glow background used by wallpaper, login and splash."""
-    defs = f'''
-<radialGradient id="bg" cx="0.28" cy="0.22" r="1.05">
-  <stop offset="0" stop-color="{NAVY_2}"/><stop offset="0.55" stop-color="{NAVY_1}"/>
-  <stop offset="1" stop-color="{NAVY_0}"/></radialGradient>
-<radialGradient id="glowA" cx="0.5" cy="0.5" r="0.5">
-  <stop offset="0" stop-color="{CORAL}" stop-opacity="0.55"/><stop offset="1" stop-color="{CORAL}" stop-opacity="0"/></radialGradient>
-<radialGradient id="glowB" cx="0.5" cy="0.5" r="0.5">
-  <stop offset="0" stop-color="{VIOLET}" stop-opacity="0.45"/><stop offset="1" stop-color="{VIOLET}" stop-opacity="0"/></radialGradient>
-<radialGradient id="glowC" cx="0.5" cy="0.5" r="0.5">
-  <stop offset="0" stop-color="{AMBER}" stop-opacity="0.35"/><stop offset="1" stop-color="{AMBER}" stop-opacity="0"/></radialGradient>
-<linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-  <stop offset="0" stop-color="{AMBER}" stop-opacity="0.9"/><stop offset="1" stop-color="{CORAL}" stop-opacity="0.2"/></linearGradient>
-<filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="{w/40:.0f}"/></filter>
-'''
-    s = w / 1920
-    body = [f'<rect width="{w}" height="{h}" fill="url(#bg)"/>']
-    body.append(f'<g filter="url(#blur)">'
-                f'<ellipse cx="{1500*s}" cy="{820*s}" rx="{620*s}" ry="{420*s}" fill="url(#glowA)"/>'
-                f'<ellipse cx="{380*s}" cy="{980*s}" rx="{640*s}" ry="{380*s}" fill="url(#glowB)"/>'
-                f'<ellipse cx="{1180*s}" cy="{180*s}" rx="{520*s}" ry="{260*s}" fill="url(#glowC)"/></g>')
-    # orbit rings
-    ocx, ocy = (1430 * s, 560 * s) if variant == "desktop" else (w / 2, h / 2)
-    for i, (rr, op) in enumerate(((330, 0.22), (450, 0.13), (590, 0.07), (760, 0.04))):
-        body.append(f'<circle cx="{ocx:.1f}" cy="{ocy:.1f}" r="{rr*s:.1f}" fill="none" '
-                    f'stroke="url(#ring)" stroke-opacity="{op}" stroke-width="{2.2*s:.2f}"/>')
-    # faint dot field
-    dots = []
-    import random
-    rnd = random.Random(7)
-    for _ in range(int(140 * (w * h) / (1920 * 1080))):
-        x, y = rnd.uniform(0, w), rnd.uniform(0, h)
-        dots.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{rnd.uniform(0.6, 1.8)*s:.2f}" '
-                    f'fill="#ffffff" fill-opacity="{rnd.uniform(0.05, 0.35):.2f}"/>')
-    body.append("".join(dots))
-    return defs, "".join(body), (ocx, ocy)
+# --------------------------------------------------------------------------
+# Flat backgrounds (no gradients or glows)
+# --------------------------------------------------------------------------
+BG = "#121830"        # flat navy
+ORANGE = "#ff9447"    # flat logo orange
+
+# Where the C sits on the 1920x1080 wallpaper: centred, a little below centre
+WALL_BOX = 256                     # the 512-unit emblem box drawn at 256 px (scale 0.5)
+WALL_CX, WALL_CY = 960, 1080 * 0.57
+
+
+def flat_bg(w, h):
+    return f'<rect width="{w}" height="{h}" fill="{BG}"/>'
+
+
+def version_tag(w, h, ref=1080):
+    """'1.0' with a smaller 'xrevolvex' underneath, bottom-right corner."""
+    s = h / ref
+    x, y = w - 64 * s, h - 78 * s
+    return (f'<text x="{x:.1f}" y="{y:.1f}" text-anchor="end" font-family="Inter Display, Inter, sans-serif" '
+            f'font-weight="600" font-size="{34*s:.1f}" fill="#ffffff" fill-opacity="0.88">1.0</text>'
+            f'<text x="{x:.1f}" y="{y + 28*s:.1f}" text-anchor="end" font-family="Inter, sans-serif" '
+            f'font-weight="500" font-size="{17*s:.1f}" letter-spacing="{1.5*s:.1f}" fill="{ORANGE}">xrevolvex</text>')
+
+
+def placed_emblem(cx, cy, box_px, fill=ORANGE):
+    sc = box_px / 512
+    return f'<g transform="translate({cx - 256*sc:.2f},{cy - 256*sc:.2f}) scale({sc:.5f})">{emblem(grad=fill)}</g>'
 
 
 def wallpaper_svg(w=1920, h=1080):
-    defs, body, (ocx, ocy) = background_layers(w, h, "desktop")
-    s = w / 1920
-    # the emblem sits inside the inner orbit, faint
-    g = (f'<g opacity="0.92" transform="translate({ocx - 256*s*0.62:.1f},{ocy - 256*s*0.62:.1f}) '
-         f'scale({s*0.62:.4f})">{emblem()}</g>')
-    return svg(w, h, body + g, defs)
+    s = h / 1080
+    return svg(w, h, flat_bg(w, h) + placed_emblem(WALL_CX * s, WALL_CY * s, WALL_BOX * s) + version_tag(w, h))
 
 
 def login_svg(w=1920, h=1080):
-    defs, body, _ = background_layers(w, h, "login")
-    s = w / 1920
-    g = (f'<g opacity="0.10" transform="translate({w/2 - 256*s*1.9:.1f},{h/2 - 256*s*1.9:.1f}) '
-         f'scale({s*1.9:.4f})">{emblem()}</g>')
-    title = (f'<text x="{w/2}" y="{120*s}" text-anchor="middle" font-family="Inter Display, Inter, sans-serif" '
-             f'font-weight="300" font-size="{40*s:.0f}" letter-spacing="{18*s:.0f}" fill="#ffffff" '
-             f'fill-opacity="0.85">CLAUDIUS</text>')
-    return svg(w, h, body + g + title, defs)
+    """Background for the fallback login screen: flat, with the version tag."""
+    return svg(w, h, flat_bg(w, h) + version_tag(w, h))
 
 
-def splash_svg(w, h, subtitle):
-    defs, body, _ = background_layers(w, h, "login")
-    logo_px = h * 0.34
-    sc = logo_px / 512
-    g = f'<g transform="translate({w/2 - 256*sc:.1f},{h*0.05:.1f}) scale({sc:.4f})">{emblem()}</g>'
-    y = h * 0.05 + logo_px + h * 0.075
+def splash_svg(w, h):
+    """Boot menu background (ISOLINUX / GRUB): logo on top, menu below."""
+    logo_px = h * 0.30
+    top = h * 0.06
+    g = placed_emblem(w / 2, top + logo_px / 2, logo_px)
+    y = top + logo_px + h * 0.07
     t = (f'<text x="{w/2}" y="{y:.1f}" text-anchor="middle" font-family="Inter Display, Inter, sans-serif" '
-         f'font-weight="600" font-size="{h*0.062:.1f}" letter-spacing="{h*0.02:.1f}" fill="#ffffff">CLAUDIUS</text>'
-         f'<text x="{w/2}" y="{y + h*0.05:.1f}" text-anchor="middle" font-family="Inter, sans-serif" '
-         f'font-size="{h*0.03:.1f}" letter-spacing="{h*0.006:.1f}" fill="{AMBER}">{subtitle}</text>')
-    return svg(w, h, body + g + t, defs)
+         f'font-weight="600" font-size="{h*0.062:.1f}" letter-spacing="{h*0.02:.1f}" fill="#ffffff">CLAUDIUS</text>')
+    return svg(w, h, flat_bg(w, h) + g + t + version_tag(w, h, ref=1080 * 0.62))
+
+
+def version_tag_svg():
+    """Standalone '1.0 / xrevolvex' tag (transparent) for the boot animation."""
+    return svg(200, 76, f'<text x="196" y="36" text-anchor="end" font-family="Inter Display, Inter, sans-serif" '
+                        f'font-weight="600" font-size="34" fill="#ffffff" fill-opacity="0.88">1.0</text>'
+                        f'<text x="196" y="64" text-anchor="end" font-family="Inter, sans-serif" font-weight="500" '
+                        f'font-size="17" letter-spacing="1.5" fill="{ORANGE}">xrevolvex</text>')
 
 
 def welcome_svg(w=800, h=300):
     """Header image for the installer's welcome page."""
-    defs, body, _ = background_layers(w, h, "login")
-    sc = (h * 0.7) / 512
-    g = f'<g transform="translate({w*0.08:.1f},{h*0.15:.1f}) scale({sc:.4f})">{emblem()}</g>'
-    t = (f'<text x="{w*0.42}" y="{h*0.5:.1f}" font-family="Inter Display, Inter, sans-serif" font-weight="600" '
+    g = placed_emblem(w * 0.2, h * 0.5, h * 0.72)
+    t = (f'<text x="{w*0.40}" y="{h*0.5:.1f}" font-family="Inter Display, Inter, sans-serif" font-weight="600" '
          f'font-size="{h*0.2:.1f}" letter-spacing="{h*0.03:.1f}" fill="#ffffff">CLAUDIUS</text>'
-         f'<text x="{w*0.42}" y="{h*0.66:.1f}" font-family="Inter, sans-serif" font-size="{h*0.075:.1f}" '
-         f'fill="{AMBER}">Light. Fast. Yours.</text>')
-    return svg(w, h, body + g + t, defs)
+         f'<text x="{w*0.40}" y="{h*0.66:.1f}" font-family="Inter, sans-serif" font-size="{h*0.075:.1f}" '
+         f'fill="{ORANGE}">Light. Fast. Yours.</text>')
+    return svg(w, h, flat_bg(w, h) + g + t)
+
+
+# --------------------------------------------------------------------------
+# Boot animation frames: the C draws itself, the dot drops in, then it breathes
+# --------------------------------------------------------------------------
+ANIM_BOX = 220          # px, frame size (the 512-unit emblem box)
+DRAW_FRAMES = 48        # stroke tracing
+DOT_FRAMES = 16         # dot drops in
+PULSE_FRAMES = 64       # looping breathe
+
+
+def _ease(t):
+    return 1 - (1 - t) ** 3
+
+
+def anim_frame_svg(i):
+    r = 176; sw = r * 0.30; cr = r * 0.70; ccy = 256 + r * 0.14
+    a0, a1 = math.radians(48), math.radians(312)
+    x0, y0 = 256 + cr * math.cos(a0), ccy + cr * math.sin(a0)
+    x1, y1 = 256 + cr * math.cos(a1), ccy + cr * math.sin(a1)
+    length = cr * math.radians(264)
+    dot_r = sw * 0.42
+    dot_cy = ccy - cr - sw / 2 - dot_r - sw * 0.45
+    if i < DRAW_FRAMES:
+        drawn, dot_t, op = _ease((i + 1) / DRAW_FRAMES), 0.0, 1.0
+    elif i < DRAW_FRAMES + DOT_FRAMES:
+        drawn, dot_t, op = 1.0, _ease((i - DRAW_FRAMES + 1) / DOT_FRAMES), 1.0
+    else:
+        k = (i - DRAW_FRAMES - DOT_FRAMES) / PULSE_FRAMES
+        drawn, dot_t, op = 1.0, 1.0, 0.62 + 0.38 * (0.5 + 0.5 * math.cos(2 * math.pi * k))
+    body = (f'<path d="M{x1:.2f},{y1:.2f} A{cr:.2f},{cr:.2f} 0 1 0 {x0:.2f},{y0:.2f}" fill="none" '
+            f'stroke="{ORANGE}" stroke-width="{sw:.1f}" stroke-linecap="round" '
+            f'stroke-dasharray="{length:.2f} {length:.2f}" stroke-dashoffset="{length * (1 - drawn):.2f}"/>')
+    if dot_t > 0:
+        body += (f'<circle cx="256" cy="{dot_cy - 60 * (1 - dot_t):.2f}" r="{dot_r * (0.4 + 0.6 * dot_t):.2f}" '
+                 f'fill="{ORANGE}" fill-opacity="{dot_t:.3f}"/>')
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">'
+            f'<g opacity="{op:.3f}">{body}</g></svg>')
 
 
 def main():
@@ -161,8 +184,9 @@ def main():
         "claudius-icon.svg": icon_svg(),
         "wallpaper.svg": wallpaper_svg(),
         "login.svg": login_svg(),
-        "splash-640x480.svg": splash_svg(640, 480, "1.0  ·  LAUREL"),
-        "splash-1024x768.svg": splash_svg(1024, 768, "1.0  ·  LAUREL"),
+        "splash-640x480.svg": splash_svg(640, 480),
+        "splash-1024x768.svg": splash_svg(1024, 768),
+        "version-tag.svg": version_tag_svg(),
         "installer-welcome.svg": welcome_svg(),
     }
     for name, content in sources.items():
@@ -187,6 +211,7 @@ def main():
         ("installer-welcome.svg", "installer-welcome.png", 800, 300),
         ("claudius-logo.svg", "claudius-logo-256.png", 256, 256),
         ("claudius-icon.svg", "claudius-avatar-96.png", 96, 96),
+        ("version-tag.svg", "version-tag.png", 200, 76),
     ]
     for size in (16, 22, 24, 32, 48, 64, 128, 256):
         jobs.append(("claudius-icon.svg", f"icon-{size}.png", size, size))
@@ -203,8 +228,26 @@ def main():
             page.wait_for_timeout(50)
             page.screenshot(path=str(PNG_DIR / dst), omit_background=True,
                             clip={"x": 0, "y": 0, "width": w, "height": h})
+        # boot animation frames
+        anim = PNG_DIR / "anim"
+        anim.mkdir(exist_ok=True)
+        page.set_viewport_size({"width": ANIM_BOX, "height": ANIM_BOX})
+        total = DRAW_FRAMES + DOT_FRAMES + PULSE_FRAMES
+        for i in range(total):
+            content = anim_frame_svg(i).replace('width="512" height="512"', f'width="{ANIM_BOX}" height="{ANIM_BOX}"', 1)
+            page.set_content(f'<html><body style="margin:0;background:transparent">{content}</body></html>')
+            page.screenshot(path=str(anim / f"frame-{i:03d}.png"), omit_background=True,
+                            clip={"x": 0, "y": 0, "width": ANIM_BOX, "height": ANIM_BOX})
         b.close()
-    print(f"rendered {len(jobs)} PNGs to {PNG_DIR}")
+    print(f"rendered {len(jobs)} PNGs and {total} animation frames to {PNG_DIR}")
+
+    # geometry shared with the greeter and the session splash (they draw the C live)
+    import json
+    (PNG_DIR / "geometry.json").write_text(json.dumps({
+        "background": BG, "orange": ORANGE,
+        "wallpaper": {"width": 1920, "height": 1080, "cx": WALL_CX, "cy": WALL_CY, "box": WALL_BOX},
+        "anim": {"box": ANIM_BOX, "draw": DRAW_FRAMES, "dot": DOT_FRAMES, "pulse": PULSE_FRAMES},
+    }, indent=2))
 
 
 if __name__ == "__main__":

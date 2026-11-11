@@ -1,0 +1,13 @@
+[Unit]
+Description=Claudius live session setup (password, installer icon)
+ConditionPathExists=/run/live/medium
+After=live-config.service systemd-user-sessions.service
+Before=display-manager.service lightdm.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/claudius/live-setup
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

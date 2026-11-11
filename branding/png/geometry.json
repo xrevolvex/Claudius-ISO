@@ -1,0 +1,17 @@
+{
+  "background": "#121830",
+  "orange": "#ff9447",
+  "wallpaper": {
+    "width": 1920,
+    "height": 1080,
+    "cx": 960,
+    "cy": 615.5999999999999,
+    "box": 256
+  },
+  "anim": {
+    "box": 220,
+    "draw": 48,
+    "dot": 16,
+    "pulse": 64
+  }
+}

@@ -1,0 +1,66 @@
+# Claudius boot animation (Plymouth script theme)
+# frame-0 .. frame-63   the C traces itself and the dot drops in
+# frame-64 .. frame-127 a gentle breathing loop
+Window.SetBackgroundTopColor(0.071, 0.094, 0.188);
+Window.SetBackgroundBottomColor(0.071, 0.094, 0.188);
+
+INTRO = 64;
+LOOP = 64;
+for (i = 0; i < INTRO + LOOP; i++)
+    frames[i] = Image("frame-" + i + ".png");
+
+logo = Sprite(frames[0]);
+logo.SetX(Window.GetX() + Window.GetWidth() / 2 - frames[0].GetWidth() / 2);
+logo.SetY(Window.GetY() + Window.GetHeight() / 2 - frames[0].GetHeight() / 2);
+logo.SetZ(10);
+
+tag_image = Image("version-tag.png");
+tag = Sprite(tag_image);
+tag.SetX(Window.GetX() + Window.GetWidth() - tag_image.GetWidth() - 44);
+tag.SetY(Window.GetY() + Window.GetHeight() - tag_image.GetHeight() - 40);
+tag.SetZ(5);
+
+tick = 0;
+fun refresh_callback ()
+{
+    tick++;
+    if (tick < INTRO)
+        idx = tick;
+    else
+        idx = INTRO + ((tick - INTRO) % LOOP);
+    logo.SetImage(frames[idx]);
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+
+# ---- disk encryption password prompt -------------------------------------
+prompt = Sprite();
+prompt.SetZ(20);
+fun display_password_callback (text, bullets)
+{
+    stars = "";
+    for (i = 0; i < bullets; i++)
+        stars = stars + "*";
+    img = Image.Text(text + "   " + stars, 1, 1, 1);
+    prompt.SetImage(img);
+    prompt.SetX(Window.GetX() + Window.GetWidth() / 2 - img.GetWidth() / 2);
+    prompt.SetY(Window.GetY() + Window.GetHeight() / 2 + frames[0].GetHeight() / 2 + 40);
+    prompt.SetOpacity(1);
+}
+fun display_normal_callback ()
+{
+    prompt.SetOpacity(0);
+}
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+
+# ---- messages (e.g. "checking disk") ---------------------------------------
+message = Sprite();
+message.SetZ(20);
+fun message_callback (text)
+{
+    img = Image.Text(text, 0.75, 0.78, 0.88);
+    message.SetImage(img);
+    message.SetX(Window.GetX() + Window.GetWidth() / 2 - img.GetWidth() / 2);
+    message.SetY(Window.GetY() + Window.GetHeight() - 80);
+}
+Plymouth.SetMessageFunction(message_callback);

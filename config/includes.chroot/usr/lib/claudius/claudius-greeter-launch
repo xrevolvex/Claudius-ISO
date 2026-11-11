@@ -1,0 +1,11 @@
+#!/bin/sh
+# Start the animated Claudius login screen. If it can't start (exit code 3:
+# it failed before contacting LightDM), fall back to the standard GTK greeter
+# so you can always log in.
+python3 /usr/lib/claudius/claudius-greeter.py
+rc=$?
+if [ "$rc" -eq 3 ] && command -v lightdm-gtk-greeter >/dev/null 2>&1; then
+    echo "claudius-greeter failed to start, using lightdm-gtk-greeter" >&2
+    exec lightdm-gtk-greeter
+fi
+exit "$rc"

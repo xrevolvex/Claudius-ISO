@@ -79,7 +79,7 @@ jobs:
           | | |
           |---|---|
           | Live login | user \`claudius\`, password \`claudius\` |
-          | Recommended VM | 8 GB RAM, 2+ CPUs, VMSVGA graphics, 25 GB disk |
+          | Recommended VM | 8 GB RAM, 2+ CPUs, VMSVGA graphics with 3D acceleration, 25 GB disk |
           | Minimum VM | 2 GB RAM, 1 CPU |
 
           The \`*.png\` files are screenshots taken automatically while this exact ISO booted in a virtual machine.

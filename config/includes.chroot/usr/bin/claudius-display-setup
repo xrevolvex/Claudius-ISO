@@ -1,17 +1,79 @@
 #!/bin/sh
-# Called by LightDM when the X server starts. VirtualBox without Guest
-# Additions often starts at 800x600; pick something comfortable instead.
+# =============================================================================
+#  claudius-display-setup: resolution and refresh rate.
+#
+#  LightDM runs this as root whenever the X server starts. `claudius refresh`
+#  also runs it.
+#
+#  Resolution:  VirtualBox without Guest Additions often starts at 800x600,
+#               so pick something comfortable instead.
+#  Refresh:     /etc/claudius/refresh  =  auto (default) | 60 | 75 | 120 | 144 | 165 | 240
+#               auto: the highest rate the screen offers. In a virtual machine,
+#               where the virtual screen only reports 60 Hz, add a 144 Hz mode.
+# =============================================================================
 command -v xrandr >/dev/null 2>&1 || exit 0
 Q=$(xrandr --query 2>/dev/null) || exit 0
 OUT=$(printf '%s\n' "$Q" | awk '/ connected/ {print $1; exit}')
 [ -n "$OUT" ] || exit 0
-CUR=$(printf '%s\n' "$Q" | awk '/\*/ {print $1; exit}')
+
+current_mode() { xrandr --query 2>/dev/null | awk '/\*/ {print $1; exit}'; }
+
+# ---- resolution ----------------------------------------------------------------
+CUR=$(current_mode)
 W=${CUR%%x*}
 case "$W" in ''|*[!0-9]*) W=0 ;; esac
-[ "$W" -ge 1280 ] && exit 0
-for m in 1920x1080 1680x1050 1600x900 1440x900 1366x768 1280x800 1280x720 1024x768; do
-    if printf '%s\n' "$Q" | grep -q "^ *$m "; then
-        xrandr --output "$OUT" --mode "$m" && exit 0
+if [ "$W" -lt 1280 ]; then
+    for m in 1920x1080 1680x1050 1600x900 1440x900 1366x768 1280x800 1280x720 1024x768; do
+        if printf '%s\n' "$Q" | grep -q "^ *$m "; then
+            xrandr --output "$OUT" --mode "$m" && break
+        fi
+    done
+fi
+
+# ---- refresh rate --------------------------------------------------------------
+MODE=$(current_mode)
+[ -n "$MODE" ] || exit 0
+MW=${MODE%%x*}; MH=${MODE##*x}; MH=${MH%%_*}
+WANT=auto
+[ -r /etc/claudius/refresh ] && WANT=$(tr -dc '0-9a-z' < /etc/claudius/refresh)
+
+# rates the screen offers for the current resolution, highest first
+RATES=$(xrandr --query 2>/dev/null | awk -v m="$MODE" '$1==m {for (i=2;i<=NF;i++) {r=$i; gsub(/[*+]/,"",r); if (r+0>0) print r}}' | sort -rn)
+MAXR=$(printf '%s\n' $RATES | head -n1 | cut -d. -f1)
+[ -n "$MAXR" ] || MAXR=60
+
+VIRT=none
+command -v systemd-detect-virt >/dev/null 2>&1 && VIRT=$(systemd-detect-virt 2>/dev/null || echo none)
+
+case "$WANT" in
+    auto|"") if [ "$VIRT" != none ] && [ "$MAXR" -lt 144 ]; then TARGET=144; else TARGET=$MAXR; fi ;;
+    *)       TARGET=$WANT ;;
+esac
+
+APPLIED=$MAXR
+if [ "$TARGET" -le "$MAXR" ] 2>/dev/null; then
+    # the screen offers it (or something higher): use the closest offered rate
+    R=$(printf '%s\n' $RATES | awk -v t="$TARGET" '{d=$1-t; if (d<0) d=-d; if (best=="" || d<bd) {best=$1; bd=d}} END {print best}')
+    [ -n "$R" ] && xrandr --output "$OUT" --mode "$MODE" --rate "$R" 2>/dev/null && APPLIED=${R%%.*}
+elif command -v cvt >/dev/null 2>&1; then
+    # not offered: make a mode with that refresh rate (works on virtual screens)
+    NAME="${MW}x${MH}_${TARGET}"
+    LINE=$(cvt "$MW" "$MH" "$TARGET" 2>/dev/null | sed -n 's/^Modeline "[^"]*" *//p')
+    if [ -n "$LINE" ]; then
+        # shellcheck disable=SC2086
+        xrandr --newmode "$NAME" $LINE 2>/dev/null
+        xrandr --addmode "$OUT" "$NAME" 2>/dev/null
+        if xrandr --output "$OUT" --mode "$NAME" 2>/dev/null; then APPLIED=$TARGET; fi
     fi
-done
+fi
+
+# ---- tell the rest of the system --------------------------------------------------
+if [ "$(id -u)" -eq 0 ]; then
+    mkdir -p /run/claudius
+    printf 'OUTPUT=%s\nMODE=%s\nREFRESH=%s\nVIRT=%s\n' "$OUT" "$(current_mode)" "$APPLIED" "$VIRT" > /run/claudius/display
+    for d in /usr/lib/firefox-esr/defaults/pref; do
+        [ -d "$d" ] && printf '// Written by claudius-display-setup\npref("layout.frame_rate", %s);\n' "$APPLIED" \
+            > "$d/claudius-refresh.js" 2>/dev/null
+    done
+fi
 exit 0

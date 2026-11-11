@@ -42,7 +42,7 @@ login_and_explore() {  # login_and_explore <prefix> <with firefox: yes/no>
     pause 40;  shot "$p-3-desktop"
     ctl key ctrl-alt-t
     pause 8
-    ctl type "claudius ram\n"
+    ctl type "claudius ram; claudius refresh\n"
     pause 4;   shot "$p-4-terminal"
     ctl type "clear; python3 ~/Python/numbers_demo.py && python3 ~/Python/system_info.py\n"
     pause 6;   shot "$p-5-python"
@@ -59,7 +59,8 @@ echo "== Test 1: BIOS, 8 GB RAM"
 start_vm bios-8gb 8192
 sleep 4; shot "bios-1-boot-menu"
 sleep 14; ctl key ret          # in case the menu timeout did not fire
-pause 75
+sleep 7; shot "bios-1b-boot-animation"
+pause 68
 login_and_explore bios yes
 stop_vm
 

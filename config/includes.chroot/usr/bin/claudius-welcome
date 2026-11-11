@@ -29,6 +29,7 @@ def read_kv(path):
 
 RELEASE = read_kv("/etc/claudius-release")
 TUNE = read_kv("/run/claudius/tune")
+DISPLAY_INFO = read_kv("/run/claudius/display")
 VERSION = RELEASE.get("CLAUDIUS_VERSION", "1.0")
 CODENAME = RELEASE.get("CLAUDIUS_CODENAME", "")
 URL = RELEASE.get("CLAUDIUS_URL", "https://github.com/xrevolvex/Claudius-ISO")
@@ -89,6 +90,8 @@ class Welcome(Gtk.Window):
         chip_texts = [f"Version {VERSION} {CODENAME}".strip()]
         if TUNE.get("PROFILE"):
             chip_texts.append(f"{TUNE['PROFILE'].capitalize()} mode · {int(TUNE.get('MEM_MB', 0)) // 1024 or '<1'} GB RAM")
+        if DISPLAY_INFO.get("REFRESH"):
+            chip_texts.append(f"{DISPLAY_INFO['REFRESH']} Hz")
         chip_texts.append("Live session" if IS_LIVE else "Installed")
         for c in chip_texts:
             lab = Gtk.Label(label=c)

@@ -1,0 +1,5 @@
+# Claudius: play the login-to-desktop animation while XFCE starts.
+# Turn it off with:  touch ~/.config/claudius/no-splash
+if [ -x /usr/bin/claudius-splash ] && [ ! -e "$HOME/.config/claudius/no-splash" ]; then
+    /usr/bin/claudius-splash >/dev/null 2>&1 &
+fi

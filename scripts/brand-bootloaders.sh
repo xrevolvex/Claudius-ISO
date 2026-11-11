@@ -70,6 +70,11 @@ for f in $(grep -rl '@APPEND_LIVE@' "$DST" 2>/dev/null); do
         }' "$f"
 done
 
+# ---- no "Boot menu" title (the splash already says CLAUDIUS) --------------------
+for f in "$DST"/syslinux_common/*.cfg "$DST"/isolinux/*.cfg; do
+    [ -f "$f" ] && sed -i '/^[[:space:]]*menu title /d' "$f"
+done
+
 # ---- no start-up beep in the GRUB menu ------------------------------------------
 [ -d "$DST/grub-pc" ] && grep -rl '^insmod play\|^play ' "$DST/grub-pc" | xargs -r sed -i -e '/^insmod play/d' -e '/^play /d'
 

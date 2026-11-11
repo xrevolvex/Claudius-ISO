@@ -22,6 +22,7 @@ cat <<EOF
   ${B}claudius python${R} <file>    run a Python script     ${D}(no file: open Python)${R}
   ${B}claudius newpy${R} [folder]   new Python project with its own virtual environment
   ${B}claudius layout${R} [name]    desktop layout: classic (Windows-like) or ubuntu
+  ${B}claudius refresh${R} [rate]   screen refresh rate: auto, 60, 75, 120, 144, 165, 240
   ${B}claudius flatpak${R} <app>    install an app from Flathub (e.g. org.gimp.GIMP)
   ${B}claudius firewall${R} [on|off] show or switch the firewall (ufw)
   ${B}claudius guest-additions${R}  install VirtualBox Guest Additions (auto-resize, clipboard)
@@ -69,6 +70,14 @@ case "${1:-}" in
     newpy|new-python|new-project)
         exec python3 /usr/share/claudius/python/new_project.py "${2:-$PWD}" ;;
     layout)  exec claudius-layout "${2:-}" ;;
+    refresh|hz)
+        if [ -n "${2:-}" ]; then
+            case "$2" in auto|60|75|90|100|120|144|165|240) ;; *) echo "use: auto, 60, 75, 120, 144, 165 or 240"; exit 1 ;; esac
+            sudo mkdir -p /etc/claudius && echo "$2" | sudo tee /etc/claudius/refresh >/dev/null
+            sudo env DISPLAY="$DISPLAY" XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}" /usr/bin/claudius-display-setup
+        fi
+        [ -r /run/claudius/display ] && . /run/claudius/display
+        echo "Screen: ${MODE:-?} at ${REFRESH:-?} Hz on ${OUTPUT:-?}  (setting: $(cat /etc/claudius/refresh 2>/dev/null || echo auto), machine: ${VIRT:-?})" ;;
     flatpak)
         shift; [ $# -gt 0 ] || { echo "which app? find IDs at https://flathub.org  (e.g. org.gimp.GIMP)"; exit 1; }
         flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo

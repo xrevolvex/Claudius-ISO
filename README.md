@@ -19,7 +19,8 @@ A Debian-based Linux desktop that tunes itself to the machine it runs on, from a
 | | |
 |---|---|
 | **Desktop** | XFCE with a Windows-style taskbar, a start menu (press <kbd>Super</kbd>), a live CPU/RAM meter and a dark Arc theme with Papirus icons |
-| **Login** | A branded login screen (LightDM). The live session's login is `claudius` / `claudius` |
+| **Boot and login** | A boot animation where the Claudius C draws itself, then the login card fades in. After you log in the C glides into place on the wallpaper as the desktop appears. Live login: `claudius` / `claudius` |
+| **Display** | Picks the best resolution and the highest refresh rate (144 Hz in VMs, whatever your monitor offers on real hardware). `claudius refresh 144` |
 | **Web** | Firefox ESR with a fast, private Claudius start page, telemetry off |
 | **Office and media** | LibreOffice Writer, Calc and Impress, VLC, a PDF viewer, an image viewer, a text and code editor (Mousepad, Geany) |
 | **Files** | Thunar file manager, archive support (zip, 7z, tar), USB drives, Trash |
@@ -57,7 +58,7 @@ Check what it picked: open a terminal and run `claudius ram`. Change it with `cl
 ## Quick start (VirtualBox)
 
 1. Download `claudius-1.0-amd64.iso` from [Releases](../../releases/latest).
-2. Create a VM: **Type** Linux, **Version** Debian (64-bit), **8 GB RAM**, **2+ CPUs**, **25 GB disk**, Graphics **VMSVGA** with 128 MB video memory.
+2. Create a VM: **Type** Linux, **Version** Debian (64-bit), **8 GB RAM**, **2+ CPUs**, **25 GB disk**, Graphics **VMSVGA**, 256 MB video memory, **3D acceleration on**.
 3. Attach the ISO and start the VM. Log in with `claudius` / `claudius`.
 
 Step-by-step instructions with every setting: **[docs/VIRTUALBOX.md](docs/VIRTUALBOX.md)**

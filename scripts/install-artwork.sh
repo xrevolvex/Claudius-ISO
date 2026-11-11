@@ -30,6 +30,19 @@ done
 install -d "$DEST/usr/share/icons/hicolor/scalable/apps"
 install -m644 "$SVG/claudius-icon.svg" "$DEST/usr/share/icons/hicolor/scalable/apps/claudius.svg"
 
+# Boot animation (Plymouth): frame-0.png ... frame-127.png, plus the version tag
+T="$DEST/usr/share/plymouth/themes/claudius"
+install -d "$T"
+i=0
+for f in $(ls "$PNG"/anim/frame-*.png | sort); do
+    install -m644 "$f" "$T/frame-$i.png"; i=$((i + 1))
+done
+install -m644 "$PNG/version-tag.png" "$T/version-tag.png"
+install -m644 "$PNG/version-tag.png" "$DEST/usr/share/claudius/logo/version-tag.png"
+# Geometry shared by the login screen and the desktop splash
+install -m644 "$PNG/geometry.json" "$DEST/usr/share/claudius/geometry.json"
+echo "boot animation: $i frames"
+
 # Installer (Calamares) branding images
 B="$DEST/etc/calamares/branding/claudius"
 install -d "$B"
