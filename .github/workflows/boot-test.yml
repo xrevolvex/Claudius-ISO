@@ -41,8 +41,8 @@ jobs:
 
       - name: Boot test (BIOS 8 GB + UEFI 2 GB)
         id: boot
-        continue-on-error: true
-        run: ./tests/boot-test.sh out/*.iso out/screenshots
+        continue-on-error: false
+        run: bash tests/boot-test.sh out/*.iso out/screenshots
 
       - name: Attach screenshots to the release
         if: always()
