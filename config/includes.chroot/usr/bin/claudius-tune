@@ -1,0 +1,105 @@
+#!/bin/sh
+# =============================================================================
+#  claudius-tune: adapts Claudius to the machine it boots on.
+#
+#  Runs once at every boot (claudius-tune.service), before the login screen.
+#  Reads how much RAM and how many CPUs the (virtual) machine has and picks
+#  a profile:
+#
+#    lite         under 3 GB   big compressed swap, few browser processes,
+#                              no compositor
+#    balanced     3 - 6 GB     moderate settings
+#    performance  6 GB and up  (8 GB VMs) more browser processes and caches,
+#                              window effects on, apps preloaded into RAM so
+#                              they open instantly
+#
+#  Override:  echo performance | sudo tee /etc/claudius/profile   (or lite/balanced/auto)
+# =============================================================================
+set -u
+
+MEM_MB=$(awk '/^MemTotal:/ {printf "%d", $2/1024}' /proc/meminfo)
+CPUS=$(nproc 2>/dev/null || echo 1)
+
+WANT=auto
+[ -r /etc/claudius/profile ] && WANT=$(tr -dc 'a-z' < /etc/claudius/profile)
+case "$WANT" in
+    lite|balanced|performance) PROFILE="$WANT" ;;
+    *)  if   [ "$MEM_MB" -ge 5800 ]; then PROFILE=performance
+        elif [ "$MEM_MB" -ge 2800 ]; then PROFILE=balanced
+        else PROFILE=lite; fi ;;
+esac
+
+case "$PROFILE" in
+    lite)
+        ZRAM_PERCENT=75; SWAPPINESS=150; CACHE_PRESSURE=100
+        FF_PROCS=2; FF_MEMCACHE=32768;  FF_SESSION_MS=60000; COMPOSITE=false ;;
+    balanced)
+        ZRAM_PERCENT=50; SWAPPINESS=100; CACHE_PRESSURE=80
+        FF_PROCS=4; FF_MEMCACHE=131072; FF_SESSION_MS=30000; COMPOSITE=false ;;
+    performance)
+        ZRAM_PERCENT=25; SWAPPINESS=20;  CACHE_PRESSURE=50
+        FF_PROCS=8; FF_MEMCACHE=524288; FF_SESSION_MS=15000; COMPOSITE=true ;;
+esac
+# Window effects also need a little CPU headroom
+[ "$CPUS" -lt 2 ] && COMPOSITE=false
+
+mkdir -p /run/claudius
+cat > /run/claudius/tune <<EOF
+PROFILE=$PROFILE
+MEM_MB=$MEM_MB
+CPUS=$CPUS
+ZRAM_PERCENT=$ZRAM_PERCENT
+FIREFOX_PROCESSES=$FF_PROCS
+COMPOSITOR=$COMPOSITE
+EOF
+
+# ---- compressed swap in RAM (zram) ------------------------------------------
+cat > /etc/default/zramswap <<EOF
+# Written by claudius-tune ($PROFILE profile). Edits are overwritten at boot.
+ALGO=zstd
+PERCENT=$ZRAM_PERCENT
+PRIORITY=100
+EOF
+
+# ---- kernel memory behaviour ---------------------------------------------------
+sysctl -q -w vm.swappiness="$SWAPPINESS" \
+           vm.vfs_cache_pressure="$CACHE_PRESSURE" \
+           vm.page-cluster=0 \
+           vm.dirty_background_ratio=5 \
+           vm.dirty_ratio=15 2>/dev/null || true
+
+# ---- I/O scheduler: virtual disks are fastest without reordering -------------
+for q in /sys/block/sd*/queue/scheduler /sys/block/vd*/queue/scheduler /sys/block/nvme*/queue/scheduler; do
+    [ -w "$q" ] && echo none > "$q" 2>/dev/null || true
+done
+
+# ---- Firefox ----------------------------------------------------------------------
+for d in /usr/lib/firefox-esr/defaults/pref /etc/firefox-esr; do
+    [ -d "$d" ] || continue
+    cat > "$d/claudius-adaptive.js" 2>/dev/null <<EOF || true
+// Written by claudius-tune ($PROFILE profile, ${MEM_MB} MB RAM)
+pref("dom.ipc.processCount", $FF_PROCS);
+pref("dom.ipc.processCount.webIsolated", $FF_PROCS);
+pref("browser.cache.memory.capacity", $FF_MEMCACHE);
+pref("browser.sessionstore.interval", $FF_SESSION_MS);
+EOF
+done
+
+# ---- window effects (only users who never changed it are affected) -----------
+X=/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml
+[ -w "$X" ] && sed -i "s|\(name=\"use_compositing\" type=\"bool\" value=\"\)[a-z]*\"|\1$COMPOSITE\"|" "$X" 2>/dev/null || true
+
+# ---- performance: warm the page cache so big apps open instantly --------------
+if [ "$PROFILE" = performance ]; then
+    (
+        sleep 20
+        for f in /usr/lib/firefox-esr/libxul.so /usr/lib/firefox-esr/omni.ja \
+                 /usr/lib/firefox-esr/browser/omni.ja /usr/lib/libreoffice/program/libmergedlo.so \
+                 /usr/bin/thunar /usr/bin/xfce4-terminal; do
+            [ -r "$f" ] && nice -n 19 ionice -c3 cat "$f" > /dev/null 2>&1
+        done
+    ) &
+fi
+
+echo "claudius-tune: $PROFILE profile (${MEM_MB} MB RAM, $CPUS CPUs)"
+exit 0

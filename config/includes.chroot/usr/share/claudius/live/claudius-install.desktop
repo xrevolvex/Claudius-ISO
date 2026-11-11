@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Install Claudius
+GenericName=System installer
+Comment=Install Claudius permanently on this computer's disk
+Exec=claudius-install
+Icon=claudius-install
+Terminal=false
+Categories=System;
+Keywords=install;installer;calamares;disk;
+StartupNotify=true

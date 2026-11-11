@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Claudius Welcome
+GenericName=Welcome and tips
+Comment=Get started with Claudius
+Exec=claudius-welcome
+Icon=claudius
+Terminal=false
+Categories=System;Settings;
+Keywords=welcome;help;tips;start;

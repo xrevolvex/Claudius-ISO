@@ -1,0 +1,40 @@
+#!/bin/sh
+# First-login setup for every Claudius user (started from XDG autostart).
+# Sets the wallpaper for whatever monitor name the VM reports, adds keyboard
+# shortcuts and trusts the desktop launchers. Runs once per user.
+STAMP="$HOME/.config/claudius/session-setup-v1"
+[ -f "$STAMP" ] && exit 0
+mkdir -p "$(dirname "$STAMP")"
+sleep 3
+
+WP=/usr/share/claudius/wallpapers/claudius-default.png
+xq() { xfconf-query "$@" 2>/dev/null || true; }
+
+# Wallpaper on every monitor and workspace
+MONS=$(xrandr --query 2>/dev/null | awk '/ connected/ {print $1}')
+for m in $MONS 0 Virtual-1 Virtual1 VGA-1 screen; do
+    for ws in 0 1 2 3; do
+        P="/backdrop/screen0/monitor$m/workspace$ws"
+        xq -c xfce4-desktop -p "$P/last-image"  -n -t string -s "$WP"
+        xq -c xfce4-desktop -p "$P/image-style" -n -t int    -s 5
+    done
+done
+xfdesktop --reload >/dev/null 2>&1 || true
+
+# Keyboard shortcuts
+xq -c xfce4-keyboard-shortcuts -p '/commands/custom/Super_L'          -n -t string -s xfce4-popup-whiskermenu
+xq -c xfce4-keyboard-shortcuts -p '/commands/custom/<Primary><Alt>t'  -n -t string -s xfce4-terminal
+xq -c xfce4-keyboard-shortcuts -p '/commands/custom/<Super>e'         -n -t string -s thunar
+xq -c xfce4-keyboard-shortcuts -p '/commands/custom/<Super>b'         -n -t string -s firefox-esr
+xq -c xfce4-keyboard-shortcuts -p '/commands/custom/<Primary><Shift>Escape' -n -t string -s xfce4-taskmanager
+xq -c xfce4-keyboard-shortcuts -p '/commands/custom/Print'            -n -t string -s 'xfce4-screenshooter -f'
+
+# Trust launchers on the desktop (XFCE asks before running untrusted ones)
+DESK=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")
+for f in "$DESK"/*.desktop; do
+    [ -f "$f" ] || continue
+    chmod +x "$f"
+    gio set "$f" metadata::xfce-exe-checksum "$(sha256sum "$f" | cut -d' ' -f1)" 2>/dev/null || true
+done
+
+touch "$STAMP"

@@ -1,0 +1,42 @@
+---
+componentName:  claudius
+
+welcomeStyleCalamares:   false
+welcomeExpandingLogo:   true
+windowExpanding:    normal
+windowSize: 920px,640px
+windowPlacement: center
+sidebar: widget
+navigation: widget
+
+strings:
+    productName:         "Claudius"
+    shortProductName:    "Claudius"
+    version:             "1.0"
+    shortVersion:        "1.0"
+    versionedName:       "Claudius 1.0 Laurel"
+    shortVersionedName:  "Claudius 1.0"
+    bootloaderEntryName: "Claudius"
+    productUrl:          "https://github.com/xrevolvex/Claudius-ISO"
+    supportUrl:          "https://github.com/xrevolvex/Claudius-ISO/issues"
+    knownIssuesUrl:      "https://github.com/xrevolvex/Claudius-ISO/issues"
+    releaseNotesUrl:     "https://github.com/xrevolvex/Claudius-ISO/releases"
+    donateUrl:           ""
+
+images:
+    productLogo:         "logo.png"
+    productIcon:         "icon.png"
+    productWelcome:      "welcome.png"
+
+slideshow:               "show.qml"
+slideshowAPI:            2
+
+style:
+    SidebarBackground:        "#0d1122"
+    SidebarText:              "#e6e9f2"
+    SidebarTextCurrent:       "#1a1206"
+    SidebarBackgroundCurrent: "#ffb547"
+    sidebarBackground:        "#0d1122"
+    sidebarText:              "#e6e9f2"
+    sidebarTextSelect:        "#1a1206"
+    sidebarTextHighlight:     "#ffb547"

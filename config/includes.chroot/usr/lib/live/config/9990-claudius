@@ -1,0 +1,45 @@
+#!/bin/sh
+# live-config component: Claudius live-session setup.
+# Runs at every boot of the live ISO only (live-config is not part of an
+# installed system). Sets the documented login password, puts "Install
+# Claudius" on the desktop and lets the live user run the installer.
+
+Claudius_live ()
+{
+	_U="${LIVE_USERNAME:-claudius}"
+	if ! getent passwd "$_U" >/dev/null 2>&1; then
+		return 0
+	fi
+
+	echo "$_U:claudius" | chpasswd
+	usermod -c "Claudius Live (password: claudius)" "$_U" 2>/dev/null || true
+
+	# Login screen must ask for the password
+	rm -f /etc/lightdm/lightdm.conf.d/*autologin* 2>/dev/null || true
+	if [ -f /etc/lightdm/lightdm.conf ]; then
+		sed -i -e '/^autologin-user/d' -e '/^autologin-user-timeout/d' /etc/lightdm/lightdm.conf
+	fi
+
+	# Installer launcher: in the menu and on the desktop
+	cp /usr/share/claudius/live/claudius-install.desktop /usr/share/applications/claudius-install.desktop
+	_D="/home/$_U/Desktop"
+	mkdir -p "$_D"
+	cp /usr/share/claudius/live/claudius-install.desktop "$_D/"
+	chmod 755 "$_D/claudius-install.desktop"
+	chown -R "$_U:$_U" "$_D"
+
+	# Installer may run without a password prompt (live session only)
+	mkdir -p /etc/polkit-1/rules.d
+	cat > /etc/polkit-1/rules.d/49-claudius-live.rules <<EOF
+polkit.addRule(function(action, subject) {
+    if (subject.user == "$_U") { return polkit.Result.YES; }
+});
+EOF
+	echo "$_U ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/90-claudius-live
+	chmod 440 /etc/sudoers.d/90-claudius-live
+
+	mkdir -p /run/claudius
+	touch /run/claudius/live
+}
+
+Claudius_live

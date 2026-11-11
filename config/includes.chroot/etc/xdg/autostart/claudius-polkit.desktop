@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Authentication agent
+Comment=Asks for your password when an app needs administrator rights
+Exec=/usr/libexec/polkit-mate-authentication-agent-1
+NoDisplay=true
+OnlyShowIn=XFCE;
+X-XFCE-Autostart-Override=true

@@ -1,0 +1,14 @@
+[Unit]
+Description=Claudius adaptive performance tuning
+DefaultDependencies=no
+After=local-fs.target systemd-sysctl.service
+Before=zramswap.service display-manager.service lightdm.service
+ConditionPathExists=/usr/bin/claudius-tune
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/claudius-tune
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target

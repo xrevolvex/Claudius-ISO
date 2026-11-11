@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claudius Start</title>
+<style>
+  :root { --bg0:#0a0e1c; --bg1:#141b33; --bg2:#22305c; --amber:#ffb547; --coral:#ff7a45; --text:#e6e9f2; --dim:#9aa3c4; --card:#161c36cc; --line:#2a3360; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; }
+  body { font-family: Cantarell, "DejaVu Sans", system-ui, sans-serif; color: var(--text);
+         background: radial-gradient(1200px 700px at 25% 15%, var(--bg2), var(--bg1) 55%, var(--bg0));
+         display:flex; flex-direction:column; align-items:center; overflow-x:hidden; }
+  .glow { position:fixed; border-radius:50%; filter: blur(90px); opacity:.35; pointer-events:none; }
+  .g1 { width:520px; height:380px; right:-80px; bottom:-60px; background: var(--coral); }
+  .g2 { width:520px; height:320px; left:-120px; bottom:-120px; background:#7c5cff; opacity:.28; }
+  main { position:relative; width:min(860px, 100% - 32px); margin-top: 11vh; text-align:center; }
+  .mark { width:64px; height:64px; }
+  #clock { font-size: clamp(56px, 11vw, 104px); font-weight: 300; letter-spacing: 2px; margin: 10px 0 0; }
+  #greet { color: var(--dim); font-size: 18px; margin: 4px 0 30px; }
+  form { display:flex; background: var(--card); border:1px solid var(--line); border-radius: 16px; padding: 6px;
+         backdrop-filter: blur(8px); box-shadow: 0 10px 40px #0006; }
+  form:focus-within { border-color: var(--amber); }
+  input { flex:1; background:transparent; border:0; outline:0; color:var(--text); font: inherit; font-size:18px; padding: 12px 14px; }
+  button { border:0; border-radius: 12px; padding: 0 22px; font: inherit; font-weight:700; cursor:pointer;
+           background: linear-gradient(90deg, var(--amber), var(--coral)); color:#1a1206; }
+  .tiles { display:grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 14px; margin-top: 34px; }
+  .tile { display:flex; flex-direction:column; align-items:center; gap:10px; padding: 18px 8px; border-radius: 14px;
+          background: var(--card); border:1px solid var(--line); color: var(--text); text-decoration:none; transition: .15s; }
+  .tile:hover { border-color: var(--amber); transform: translateY(-2px); }
+  .ico { width:44px; height:44px; border-radius: 12px; display:grid; place-items:center; font-weight:800; font-size:20px; color:#fff; }
+  footer { position:relative; margin: auto 0 22px; padding-top: 40px; color: var(--dim); font-size: 13px; }
+  footer a { color: var(--amber); text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="glow g1"></div><div class="glow g2"></div>
+<main>
+  <svg class="mark" viewBox="0 0 512 512" aria-hidden="true">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb547"/><stop offset="1" stop-color="#ff7a45"/></linearGradient></defs>
+    <path d="M338.4,189.3 A123.2,123.2 0 1 0 338.4,372.4" fill="none" stroke="url(#g)" stroke-width="52.8" stroke-linecap="round"/>
+    <circle cx="256" cy="85" r="22" fill="url(#g)"/>
+  </svg>
+  <div id="clock">--:--</div>
+  <div id="greet">Welcome to Claudius</div>
+  <form action="https://duckduckgo.com/" method="get" autocomplete="off">
+    <input name="q" placeholder="Search the web or type an address" autofocus>
+    <button type="submit">Search</button>
+  </form>
+  <div class="tiles">
+    <a class="tile" href="https://en.wikipedia.org/"><span class="ico" style="background:#3c4a7a">W</span>Wikipedia</a>
+    <a class="tile" href="https://www.youtube.com/"><span class="ico" style="background:#d33">▶</span>YouTube</a>
+    <a class="tile" href="https://github.com/"><span class="ico" style="background:#24292f">G</span>GitHub</a>
+    <a class="tile" href="https://news.ycombinator.com/"><span class="ico" style="background:#ff6600">Y</span>Hacker News</a>
+    <a class="tile" href="https://www.openstreetmap.org/"><span class="ico" style="background:#4a9a5b">⌖</span>Maps</a>
+    <a class="tile" href="https://wiki.debian.org/"><span class="ico" style="background:#a80030">D</span>Debian Wiki</a>
+  </div>
+</main>
+<footer>Claudius · light, fast, yours · <a href="https://github.com/xrevolvex/Claudius-ISO">GitHub</a></footer>
+<script>
+  function tick() {
+    const d = new Date();
+    document.getElementById('clock').textContent =
+      d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    const h = d.getHours();
+    const part = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+    document.getElementById('greet').textContent = part + ' · ' +
+      d.toLocaleDateString([], {weekday: 'long', day: 'numeric', month: 'long'});
+  }
+  tick(); setInterval(tick, 1000);
+  document.querySelector('form').addEventListener('submit', e => {
+    const q = e.target.q.value.trim();
+    if (/^(https?:\/\/)?[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(q) && !q.includes(' ')) {
+      e.preventDefault(); location.href = q.startsWith('http') ? q : 'https://' + q;
+    }
+  });
+</script>
+</body>
+</html>

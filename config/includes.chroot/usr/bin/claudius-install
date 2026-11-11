@@ -1,0 +1,11 @@
+#!/bin/sh
+# Launch the Claudius installer (Calamares). Only works from the live ISO.
+if [ ! -d /run/live/medium ]; then
+    zenity --info --text="Claudius is already installed on this computer." 2>/dev/null \
+        || echo "Claudius is already installed on this computer."
+    exit 0
+fi
+if sudo -n true 2>/dev/null; then
+    exec sudo -n -E calamares "$@"
+fi
+exec pkexec env DISPLAY="$DISPLAY" XAUTHORITY="$XAUTHORITY" calamares "$@"

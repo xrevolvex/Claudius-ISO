@@ -1,0 +1,21 @@
+
+# ---- CLAUDIUS-BASHRC --------------------------------------------------------
+# Claudius prompt:  user@claudius ~/folder ❯
+if [ -n "$PS1" ]; then
+    __c_amber='\[\e[38;5;215m\]'; __c_coral='\[\e[38;5;209m\]'; __c_dim='\[\e[38;5;245m\]'; __c_off='\[\e[0m\]'
+    if [ "$(id -u)" -eq 0 ]; then __c_user='\[\e[1;31m\]'; else __c_user=$__c_amber; fi
+    PS1="${__c_user}\u${__c_dim}@\h ${__c_coral}\w ${__c_amber}❯${__c_off} "
+    unset __c_amber __c_coral __c_dim __c_off __c_user
+
+    alias ll='ls -lh --group-directories-first'
+    alias la='ls -lAh --group-directories-first'
+    alias ..='cd ..'
+    alias update='claudius update'
+
+    # Show the system card once per terminal window
+    if [ -z "$CLAUDIUS_FETCHED" ] && [ -t 1 ] && command -v fastfetch >/dev/null 2>&1 && [ "$TERM" != "linux" ]; then
+        export CLAUDIUS_FETCHED=1
+        fastfetch
+    fi
+fi
+# ---- /CLAUDIUS-BASHRC -------------------------------------------------------

@@ -1,0 +1,104 @@
+name: Build Claudius ISO
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**", "LICENSE"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-iso
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build, boot-test and release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space on the runner
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL \
+                      /usr/local/share/boost /usr/local/.ghcup /opt/microsoft || true
+          sudo docker image prune -af >/dev/null || true
+          df -h /
+
+      - name: Read version
+        id: v
+        run: |
+          . ./claudius.conf
+          echo "version=$CLAUDIUS_VERSION" >> "$GITHUB_OUTPUT"
+          echo "codename=$CLAUDIUS_CODENAME" >> "$GITHUB_OUTPUT"
+
+      - name: Build the ISO (Debian 13 container)
+        env:
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        run: ./scripts/build-in-docker.sh
+
+      - name: Check ISO
+        id: iso
+        run: |
+          sudo chown -R "$USER" out
+          ISO=$(ls out/*.iso)
+          SIZE=$(stat -c%s "$ISO")
+          echo "path=$ISO" >> "$GITHUB_OUTPUT"
+          echo "ISO: $ISO  ($(numfmt --to=iec "$SIZE"))"
+          if [ "$SIZE" -gt 2147483648 ]; then
+            echo "::error::The ISO is larger than GitHub's 2 GiB release-file limit"; exit 1
+          fi
+
+      - name: Boot test in QEMU (BIOS 8 GB + UEFI 2 GB)
+        id: boot
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq qemu-system-x86 ovmf >/dev/null
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm || true
+          ./tests/boot-test.sh "${{ steps.iso.outputs.path }}" out/screenshots
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ steps.v.outputs.version }}"
+          ISO="${{ steps.iso.outputs.path }}"
+          gzip -kf out/build.log
+          cat > notes.md <<EOF
+          ## Claudius ${{ steps.v.outputs.version }} "${{ steps.v.outputs.codename }}"
+
+          Build #${{ github.run_number }} from commit ${GITHUB_SHA::7}. Boot test: **${{ steps.boot.outcome }}**.
+
+          **Download** \`$(basename "$ISO")\` below and follow the [VirtualBox guide](https://github.com/${{ github.repository }}/blob/main/docs/VIRTUALBOX.md).
+
+          | | |
+          |---|---|
+          | Live login | user \`claudius\`, password \`claudius\` |
+          | Recommended VM | 8 GB RAM, 2+ CPUs, VMSVGA graphics, 25 GB disk |
+          | Minimum VM | 2 GB RAM, 1 CPU |
+
+          The \`*.png\` files are screenshots taken automatically while this exact ISO booted in a virtual machine.
+          EOF
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          sleep 3
+          gh release create "$TAG" --title "Claudius ${{ steps.v.outputs.version }} ${{ steps.v.outputs.codename }}" \
+             --notes-file notes.md --latest \
+             "$ISO" "$ISO.sha256" out/build.log.gz out/screenshots/*.png out/packages.txt 2>/dev/null \
+          || gh release create "$TAG" --title "Claudius ${{ steps.v.outputs.version }} ${{ steps.v.outputs.codename }}" \
+             --notes-file notes.md --latest "$ISO" "$ISO.sha256" out/build.log.gz
+
+      - name: Publish logs when the build fails
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p out && sudo chown -R "$USER" out || true
+          [ -f out/build.log ] && tail -n 3000 out/build.log > out/build-tail.log || echo "no build log" > out/build-tail.log
+          gh release delete ci-logs --yes --cleanup-tag 2>/dev/null || true
+          gh release create ci-logs --prerelease --title "CI logs (failed build #${{ github.run_number }})" \
+             --notes "Logs from the last failed build." out/build-tail.log $(ls out/screenshots/*.png 2>/dev/null)

@@ -1,0 +1,80 @@
+#!/bin/bash
+# claudius: friendly shortcuts for everyday system tasks.
+. /etc/claudius-release 2>/dev/null
+
+A=$'\e[38;5;215m'; C=$'\e[38;5;209m'; B=$'\e[1m'; D=$'\e[2m'; R=$'\e[0m'
+
+usage() {
+cat <<EOF
+
+  ${A}${B}●${R}
+  ${C}${B}Claudius ${CLAUDIUS_VERSION} ${CLAUDIUS_CODENAME}${R}  ${D}shortcuts${R}
+
+  ${B}claudius info${R}             system summary
+  ${B}claudius ram${R}              memory use, top apps and the active performance profile
+  ${B}claudius profile${R} [name]   show or set the profile: auto, lite, balanced, performance
+  ${B}claudius update${R}           update everything
+  ${B}claudius install${R} <app>    install apps   (e.g. claudius install gimp)
+  ${B}claudius remove${R} <app>     remove apps
+  ${B}claudius search${R} <word>    search the app catalogue
+  ${B}claudius clean${R}            free disk space (package cache, old logs, trash)
+  ${B}claudius tips${R}             keyboard shortcuts and tricks
+  ${B}claudius about${R}            version and project link
+
+EOF
+}
+
+case "${1:-}" in
+    info|fetch)   fastfetch ;;
+    ram|mem|memory)
+        [ -r /run/claudius/tune ] && . /run/claudius/tune
+        echo
+        echo "  ${B}Profile:${R} ${A}${PROFILE:-unknown}${R}   ${D}(${MEM_MB:-?} MB RAM, ${CPUS:-?} CPUs, zram ${ZRAM_PERCENT:-?}%, Firefox processes ${FIREFOX_PROCESSES:-?})${R}"
+        echo
+        free -h
+        echo
+        echo "  ${B}Top memory users${R}"
+        ps -eo rss=,comm= --sort=-rss | head -n 8 | awk '{printf "  %7.0f MB  %s\n", $1/1024, $2}'
+        echo ;;
+    profile)
+        if [ -n "${2:-}" ]; then
+            case "$2" in auto|lite|balanced|performance) ;; *) echo "use: auto, lite, balanced or performance"; exit 1 ;; esac
+            sudo mkdir -p /etc/claudius && echo "$2" | sudo tee /etc/claudius/profile >/dev/null
+            sudo /usr/bin/claudius-tune
+            echo "Saved. Some settings (window effects, Firefox) apply after you log out and back in."
+        else
+            [ -r /run/claudius/tune ] && cat /run/claudius/tune
+        fi ;;
+    update|upgrade) sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y ;;
+    install)  shift; [ $# -gt 0 ] || { echo "what should I install?"; exit 1; }; sudo apt install -y "$@" ;;
+    remove)   shift; [ $# -gt 0 ] || { echo "what should I remove?"; exit 1; }; sudo apt remove -y "$@" ;;
+    search)   shift; apt search "$@" 2>/dev/null ;;
+    clean)
+        sudo apt clean && sudo apt autoremove -y
+        sudo journalctl --vacuum-size=50M >/dev/null 2>&1
+        rm -rf "$HOME/.local/share/Trash/"* "$HOME/.cache/thumbnails/"* 2>/dev/null
+        df -h / ;;
+    tips)
+cat <<EOF
+
+  ${B}Keyboard${R}
+    Super ............... app menu            Ctrl+Alt+T ...... terminal
+    Super+E ............. files               Super+B ......... browser
+    Ctrl+Shift+Esc ...... task manager        Print ........... screenshot
+    Alt+Tab ............. switch windows      Drag to an edge . snap a window
+
+  ${B}VirtualBox${R}
+    Bigger screen: Settings > Display, or Devices > Insert Guest Additions CD
+    Shared clipboard and folders need the Guest Additions (see the README)
+
+  ${B}Terminal${R}
+    Tab completes commands and file names. Ctrl+R searches your history.
+
+EOF
+        ;;
+    about|version|--version|-v)
+        echo "Claudius ${CLAUDIUS_VERSION} (${CLAUDIUS_CODENAME}), built ${CLAUDIUS_BUILD_DATE}, based on Debian $(cat /etc/debian_version 2>/dev/null)"
+        echo "${CLAUDIUS_URL}" ;;
+    ""|help|-h|--help) usage ;;
+    *) echo "unknown command: $1"; usage; exit 1 ;;
+esac

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Claudius session setup
+Exec=claudius-session-setup
+NoDisplay=true
+OnlyShowIn=XFCE;
+X-XFCE-Autostart-Override=true

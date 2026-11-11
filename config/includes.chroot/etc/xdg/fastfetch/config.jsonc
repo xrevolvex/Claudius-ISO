@@ -1,0 +1,28 @@
+// Claudius system card (run: fastfetch, or claudius info)
+{
+  "logo": {
+    "type": "file",
+    "source": "/usr/share/claudius/fastfetch/logo.txt",
+    "color": { "1": "38;5;215", "2": "38;5;209" },
+    "padding": { "top": 1, "left": 2, "right": 4 }
+  },
+  "display": {
+    "separator": "  ",
+    "color": { "keys": "38;5;215", "title": "38;5;209" }
+  },
+  "modules": [
+    "title",
+    "separator",
+    { "type": "os", "key": "System" },
+    { "type": "kernel", "key": "Kernel" },
+    { "type": "uptime", "key": "Uptime" },
+    { "type": "packages", "key": "Packages" },
+    { "type": "de", "key": "Desktop" },
+    { "type": "cpu", "key": "CPU" },
+    { "type": "memory", "key": "Memory" },
+    { "type": "disk", "key": "Disk", "folders": "/" },
+    { "type": "command", "key": "Mode", "text": "[ -r /run/claudius/tune ] && . /run/claudius/tune && echo \"$PROFILE profile\" || echo default" },
+    "break",
+    "colors"
+  ]
+}

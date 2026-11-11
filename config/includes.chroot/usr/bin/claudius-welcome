@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+"""Claudius Welcome: the first thing you see after logging in."""
+import os
+import subprocess
+import sys
+
+import gi
+
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gdk, GLib, Gtk  # noqa: E402
+
+CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".config", "claudius")
+HIDE_FLAG = os.path.join(CONFIG_DIR, "welcome-hidden")
+IS_LIVE = os.path.isdir("/run/live/medium")
+
+
+def read_kv(path):
+    data = {}
+    try:
+        with open(path) as fh:
+            for line in fh:
+                if "=" in line:
+                    k, v = line.strip().split("=", 1)
+                    data[k] = v.strip('"')
+    except OSError:
+        pass
+    return data
+
+
+RELEASE = read_kv("/etc/claudius-release")
+TUNE = read_kv("/run/claudius/tune")
+VERSION = RELEASE.get("CLAUDIUS_VERSION", "1.0")
+CODENAME = RELEASE.get("CLAUDIUS_CODENAME", "")
+URL = RELEASE.get("CLAUDIUS_URL", "https://github.com/xrevolvex/Claudius-ISO")
+
+CSS = b"""
+window.claudius { background: #0d1122; }
+.hero { background-image: linear-gradient(120deg, #22305c 0%, #141b33 55%, #3a2230 100%);
+        padding: 26px 30px; }
+.title { font-size: 26px; font-weight: 700; color: #ffffff; }
+.subtitle { font-size: 13px; color: #c8cde0; }
+.chip { background: rgba(255,181,71,0.15); color: #ffb547; border-radius: 99px;
+        padding: 3px 10px; font-size: 11px; font-weight: 700; }
+.tile { background: #161c36; border: 1px solid #262f55; border-radius: 12px; padding: 14px;
+        transition: all 120ms ease; }
+.tile:hover { background: #1d2547; border-color: #ffb547; }
+.tile-title { color: #ffffff; font-weight: 700; font-size: 13px; }
+.tile-text { color: #9aa3c4; font-size: 11px; }
+.primary { background-image: linear-gradient(90deg, #ffb547, #ff7a45); border: none;
+           border-radius: 10px; padding: 10px 18px; }
+.primary label { color: #1a1206; font-weight: 800; }
+.tips { color: #c8cde0; font-size: 12px; }
+.tips b { color: #ffb547; }
+.footer { color: #7d86aa; font-size: 11px; }
+"""
+
+
+def run(cmd):
+    try:
+        subprocess.Popen(cmd, start_new_session=True)
+    except OSError as err:
+        print(f"could not start {cmd}: {err}", file=sys.stderr)
+
+
+class Welcome(Gtk.Window):
+    def __init__(self):
+        super().__init__(title="Welcome to Claudius")
+        self.get_style_context().add_class("claudius")
+        self.set_default_size(820, 560)
+        self.set_position(Gtk.WindowPosition.CENTER)
+        self.set_icon_name("claudius")
+
+        root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.add(root)
+
+        # ---- hero ------------------------------------------------------------
+        hero = Gtk.Box(spacing=20)
+        hero.get_style_context().add_class("hero")
+        logo = Gtk.Image.new_from_icon_name("claudius", Gtk.IconSize.DIALOG)
+        logo.set_pixel_size(84)
+        hero.pack_start(logo, False, False, 0)
+        texts = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        t = Gtk.Label(label="Welcome to Claudius", xalign=0)
+        t.get_style_context().add_class("title")
+        s = Gtk.Label(xalign=0, wrap=True)
+        s.set_text("A light, fast desktop built on Debian. Everything you need is one click away.")
+        s.get_style_context().add_class("subtitle")
+        chips = Gtk.Box(spacing=8)
+        chip_texts = [f"Version {VERSION} {CODENAME}".strip()]
+        if TUNE.get("PROFILE"):
+            chip_texts.append(f"{TUNE['PROFILE'].capitalize()} mode · {int(TUNE.get('MEM_MB', 0)) // 1024 or '<1'} GB RAM")
+        chip_texts.append("Live session" if IS_LIVE else "Installed")
+        for c in chip_texts:
+            lab = Gtk.Label(label=c)
+            lab.get_style_context().add_class("chip")
+            chips.pack_start(lab, False, False, 0)
+        for w in (t, s, chips):
+            texts.pack_start(w, False, False, 0)
+        hero.pack_start(texts, True, True, 0)
+        if IS_LIVE:
+            inst = Gtk.Button(label="Install Claudius")
+            inst.get_style_context().add_class("primary")
+            inst.set_valign(Gtk.Align.CENTER)
+            inst.connect("clicked", lambda *_: run(["claudius-install"]))
+            hero.pack_end(inst, False, False, 0)
+        root.pack_start(hero, False, False, 0)
+
+        # ---- tiles -----------------------------------------------------------
+        grid = Gtk.Grid(column_spacing=12, row_spacing=12, margin=22, column_homogeneous=True)
+        tiles = [
+            ("firefox-esr", "Browse the web", "Firefox with a Claudius start page", ["firefox-esr"]),
+            ("system-file-manager", "Your files", "Folders, USB drives and Trash", ["thunar"]),
+            ("utilities-terminal", "Terminal", "Type  claudius  to see shortcuts", ["xfce4-terminal"]),
+            ("libreoffice-startcenter", "Office", "Documents, spreadsheets, slides", ["libreoffice", "--writer"]),
+            ("synaptic", "Get more apps", "Thousands of free Debian apps", ["pkexec", "synaptic"]),
+            ("preferences-desktop", "Settings", "Display, keyboard, theme and more", ["xfce4-settings-manager"]),
+            ("preferences-desktop-display", "Screen size", "Change the resolution", ["xfce4-display-settings"]),
+            ("input-keyboard", "Keyboard layout", "Add your language's layout", ["xfce4-keyboard-settings"]),
+        ]
+        for i, (icon, title, text, cmd) in enumerate(tiles):
+            grid.attach(self.tile(icon, title, text, cmd), i % 4, i // 4, 1, 1)
+        root.pack_start(grid, False, False, 0)
+
+        # ---- tips --------------------------------------------------------------
+        tips = Gtk.Label(xalign=0, wrap=True, margin_start=24, margin_end=24)
+        tips.set_markup(
+            "<b>Super</b> opens the menu · <b>Ctrl+Alt+T</b> opens a terminal · <b>Super+E</b> files · "
+            "<b>Super+B</b> browser · <b>Ctrl+Shift+Esc</b> task manager · <b>Print</b> screenshot\n"
+            "Claudius tunes itself to the RAM of your VM at every boot. Run <b>claudius ram</b> in a "
+            "terminal to see what it chose.")
+        tips.get_style_context().add_class("tips")
+        root.pack_start(tips, False, False, 0)
+
+        # ---- footer --------------------------------------------------------------
+        foot = Gtk.Box(spacing=12, margin=18)
+        self.show_again = Gtk.CheckButton(label="Show this window at login")
+        self.show_again.set_active(not os.path.exists(HIDE_FLAG))
+        self.show_again.connect("toggled", self.on_toggle)
+        foot.pack_start(self.show_again, False, False, 0)
+        link = Gtk.LinkButton.new_with_label(URL, "Claudius on GitHub")
+        foot.pack_end(link, False, False, 0)
+        if IS_LIVE:
+            cred = Gtk.Label(label="Live login: claudius / claudius")
+            cred.get_style_context().add_class("footer")
+            foot.pack_end(cred, False, False, 12)
+        root.pack_end(foot, False, False, 0)
+
+    def tile(self, icon, title, text, cmd):
+        btn = Gtk.Button()
+        btn.set_relief(Gtk.ReliefStyle.NONE)
+        btn.get_style_context().add_class("tile")
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        img = Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.DIALOG)
+        img.set_pixel_size(40)
+        img.set_halign(Gtk.Align.START)
+        tl = Gtk.Label(label=title, xalign=0)
+        tl.get_style_context().add_class("tile-title")
+        tx = Gtk.Label(label=text, xalign=0, wrap=True)
+        tx.set_max_width_chars(18)
+        tx.get_style_context().add_class("tile-text")
+        for w in (img, tl, tx):
+            box.pack_start(w, False, False, 0)
+        btn.add(box)
+        btn.connect("clicked", lambda *_: run(cmd))
+        return btn
+
+    def on_toggle(self, button):
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        if button.get_active():
+            if os.path.exists(HIDE_FLAG):
+                os.remove(HIDE_FLAG)
+        else:
+            open(HIDE_FLAG, "w").close()
+
+
+def main():
+    if "--autostart" in sys.argv and os.path.exists(HIDE_FLAG):
+        return
+    provider = Gtk.CssProvider()
+    provider.load_from_data(CSS)
+    Gtk.StyleContext.add_provider_for_screen(
+        Gdk.Screen.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    win = Welcome()
+    win.connect("destroy", Gtk.main_quit)
+    win.show_all()
+    if "--autostart" in sys.argv:
+        GLib.timeout_add(100, lambda: win.present() or False)
+    Gtk.main()
+
+
+if __name__ == "__main__":
+    main()

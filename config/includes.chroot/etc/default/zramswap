@@ -1,0 +1,4 @@
+# Default zram settings. claudius-tune rewrites this file at boot for the RAM size.
+ALGO=zstd
+PERCENT=50
+PRIORITY=100

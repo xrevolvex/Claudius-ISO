@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Claudius Welcome
+Exec=claudius-welcome --autostart
+Icon=claudius
+NoDisplay=true
+OnlyShowIn=XFCE;
+X-XFCE-Autostart-Override=true

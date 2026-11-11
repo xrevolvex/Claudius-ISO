@@ -1,0 +1,128 @@
+#!/bin/sh
+# =============================================================================
+#  Claudius system setup. Runs inside the image while it is being built.
+# =============================================================================
+set -e
+. /etc/claudius-release
+V="$CLAUDIUS_VERSION"; C="$CLAUDIUS_CODENAME"; U="$CLAUDIUS_URL"
+
+echo "I: [claudius] tools and services"
+chmod 755 /usr/bin/claudius /usr/bin/claudius-* /usr/lib/live/config/9990-claudius
+systemctl enable claudius-tune.service
+
+echo "I: [claudius] identity"
+# ---------------------------------------------------------------- os-release
+if ! dpkg-divert --list /usr/lib/os-release | grep -q claudius; then
+    dpkg-divert --package claudius --local --rename --divert /usr/lib/os-release.debian --add /usr/lib/os-release
+fi
+cat > /usr/lib/os-release <<EOF
+PRETTY_NAME="Claudius $V ($C)"
+NAME="Claudius"
+VERSION_ID="$V"
+VERSION="$V ($C)"
+VERSION_CODENAME=trixie
+ID=claudius
+ID_LIKE=debian
+HOME_URL="$U"
+SUPPORT_URL="$U/discussions"
+BUG_REPORT_URL="$U/issues"
+LOGO=claudius
+EOF
+ln -sf ../usr/lib/os-release /etc/os-release
+
+for f in /etc/issue /etc/issue.net; do
+    if ! dpkg-divert --list "$f" | grep -q claudius; then
+        dpkg-divert --package claudius --local --rename --divert "$f.debian" --add "$f"
+    fi
+done
+printf 'Claudius %s (%s) \\n \\l\n\n' "$V" "$C" > /etc/issue
+printf 'Claudius %s (%s)\n' "$V" "$C" > /etc/issue.net
+cat > /etc/motd <<EOF
+
+  Welcome to Claudius $V ($C). Type 'claudius' for handy shortcuts.
+
+EOF
+
+echo "I: [claudius] desktop defaults"
+# ---------------------------------------------------------------- wallpaper
+# Debian's desktop-base points every desktop at this alternative; point it at ours.
+if [ -d /usr/share/images/desktop-base ]; then
+    for alt in desktop-background desktop-background.xml desktop-login-background; do
+        update-alternatives --install "/usr/share/images/desktop-base/$alt" "$alt" \
+            /usr/share/claudius/wallpapers/claudius-default.png 90 2>/dev/null || true
+        update-alternatives --set "$alt" /usr/share/claudius/wallpapers/claudius-default.png 2>/dev/null || true
+    done
+fi
+# XFCE's built-in fallback wallpaper
+if [ -d /usr/share/backgrounds/xfce ]; then
+    ln -sf /usr/share/claudius/wallpapers/claudius-default.png /usr/share/backgrounds/xfce/xfce-shapes.svg.claudius
+fi
+
+# ---------------------------------------------------------------- shell
+if ! grep -q 'CLAUDIUS-BASHRC' /etc/skel/.bashrc; then
+    cat /usr/share/claudius/skel/bashrc-append >> /etc/skel/.bashrc
+fi
+if ! grep -q 'CLAUDIUS-BASHRC' /root/.bashrc 2>/dev/null; then
+    cat /usr/share/claudius/skel/bashrc-append >> /root/.bashrc
+fi
+
+# ---------------------------------------------------------------- Firefox
+# Default prefs and policies wherever this Firefox ESR build looks for them
+for d in /usr/lib/firefox-esr/defaults/pref /etc/firefox-esr; do
+    if [ -d "$d" ]; then cp /usr/share/claudius/firefox/claudius-prefs.js "$d/claudius-prefs.js"; fi
+done
+for d in /usr/lib/firefox-esr/distribution /etc/firefox/policies /etc/firefox-esr/policies; do
+    mkdir -p "$d"; cp /usr/share/claudius/firefox/policies.json "$d/policies.json"
+done
+
+echo "I: [claudius] installer"
+# ---------------------------------------------------------------- Calamares
+if [ -f /etc/calamares/settings.conf ]; then
+    sed -i 's/^branding:.*/branding: claudius/' /etc/calamares/settings.conf
+    echo "---- calamares settings.conf ----"; cat /etc/calamares/settings.conf
+    echo "---- calamares modules ----"; ls -la /etc/calamares/modules/ || true
+    for m in bootloader users unpackfs packages welcome displaymanager shellprocess* sources*; do
+        for f in /etc/calamares/modules/$m.conf; do [ -f "$f" ] && { echo "== $f"; grep -v '^\s*#' "$f" | grep -v '^\s*$'; }; done
+    done
+    echo "---- calamares-settings-debian files ----"; dpkg -L calamares-settings-debian | grep -v '/usr/share/doc' || true
+fi
+# Debian's own "Install Debian" launcher is replaced by "Install Claudius"
+rm -f /usr/share/applications/install-debian.desktop /usr/share/applications/calamares.desktop \
+      /etc/skel/Desktop/install-debian.desktop 2>/dev/null || true
+
+# ---------------------------------------------------------------- GRUB on the installed system
+mkdir -p /etc/default/grub.d
+cat > /etc/default/grub.d/90-claudius.cfg <<'EOF'
+GRUB_DISTRIBUTOR="Claudius"
+GRUB_TIMEOUT=2
+GRUB_CMDLINE_LINUX_DEFAULT="quiet"
+GRUB_BACKGROUND="/usr/share/claudius/boot/grub-background.png"
+EOF
+
+echo "I: [claudius] slimming for low RAM"
+# ---------------------------------------------------------------- remove services a VM desktop doesn't need
+for p in modemmanager bluez cups cups-daemon cups-browsed avahi-daemon exim4-base exim4-daemon-light \
+         xscreensaver plymouth; do
+    if dpkg -s "$p" >/dev/null 2>&1; then
+        echo "   purging $p"
+        apt-get purge -y "$p" >/dev/null 2>&1 || echo "   (could not purge $p)"
+    fi
+done
+for t in apt-daily.timer apt-daily-upgrade.timer man-db.timer e2scrub_all.timer \
+         NetworkManager-wait-online.service ModemManager.service; do
+    systemctl disable "$t" >/dev/null 2>&1 || true
+done
+systemctl mask NetworkManager-wait-online.service >/dev/null 2>&1 || true
+systemctl enable zramswap.service >/dev/null 2>&1 || true
+
+# ---------------------------------------------------------------- caches
+locale-gen en_US.UTF-8 >/dev/null 2>&1 || true
+update-locale LANG=en_US.UTF-8 2>/dev/null || true
+gtk-update-icon-cache -f -q /usr/share/icons/hicolor 2>/dev/null || true
+gtk-update-icon-cache -f -q /usr/share/icons/Papirus-Dark 2>/dev/null || true
+update-desktop-database -q /usr/share/applications 2>/dev/null || true
+fc-cache -f >/dev/null 2>&1 || true
+apt-get clean
+rm -rf /var/lib/apt/lists/*_Translation-* /tmp/* 2>/dev/null || true
+
+echo "I: [claudius] system hook done"
