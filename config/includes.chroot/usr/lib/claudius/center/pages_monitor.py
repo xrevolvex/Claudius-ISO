@@ -409,8 +409,8 @@ class MonitorPage(Page):
         hot = [(n, v) for n, v in temperatures() if v > 85]
         if hot:
             tips.append(("bad", f"{hot[0][0]} is hot ({hot[0][1]:.0f} °C). Check the fans and air vents."))
-        n_start = sum(1 for e in autostart_entries() if e[3])
-        if n_start > 10:
+        n_start = sum(1 for e in autostart_entries() if e[3] and os.path.exists(os.path.expanduser(f"~/.config/autostart/{e[0]}")))
+        if n_start > 6:
             tips.append(("warn", f"{n_start} apps start at login. Turning some off (below) makes start-up faster."))
         if not tips:
             tips.append(("ok", "Nothing is slowing your computer down right now."))

@@ -55,6 +55,10 @@ combobox button { background-image: none; background-color: #0f1530; color: #fff
 """
 
 
+def log(msg):
+    print(f"claudius-greeter: {msg}", file=sys.stderr, flush=True)
+
+
 def ease_out(t):
     t = max(0.0, min(1.0, t))
     return 1 - (1 - t) ** 3
@@ -96,6 +100,9 @@ class Greeter(Gtk.Window):
         self.shake_t = None
         self.prompted = False
         self.pending = None
+        self.awaiting = False      # a password was sent and we wait for LightDM's answer
+        self.last_pw = None
+        self.retried = False
         self.user = None
         self.users = {}
         self._t = 0.0
@@ -212,10 +219,12 @@ class Greeter(Gtk.Window):
         self.greeter.authenticate(name)
 
     # ------------------------------------------------------------------ auth
-    def on_prompt(self, _greeter, _text, _type):
+    def on_prompt(self, _greeter, text, _type):
+        log(f"prompt: {text!r}")
         self.prompted = True
         if self.pending is not None:
             pw, self.pending = self.pending, None
+            self.prompted = False
             self.greeter.respond(pw)
 
     def on_message(self, _greeter, text, _type):
@@ -233,13 +242,34 @@ class Greeter(Gtk.Window):
             self.greeter.authenticate(name)
         pw = self.password.get_text()
         self.error.set_text("")
+        self.last_pw, self.awaiting, self.retried = pw, True, False
+        log(f"login: prompted={self.prompted}")
         if self.prompted:
             self.prompted = False
             self.greeter.respond(pw)
         else:
             self.pending = pw
+        GLib.timeout_add(5000, self.check_stuck)
+
+    def check_stuck(self):
+        """LightDM never answered (a lost prompt): start the conversation again and resend once."""
+        if self.awaiting and self.phase != "leaving" and not self.retried and self.user:
+            log("no answer from LightDM: retrying authentication")
+            self.retried = True
+            if self.greeter.get_in_authentication():
+                self.greeter.cancel_authentication()
+            self.prompted = False
+            self.pending = self.last_pw
+            self.greeter.authenticate(self.user)
+            GLib.timeout_add(6000, self.check_stuck)
+        elif self.awaiting and self.retried and self.phase != "leaving":
+            self.awaiting = False
+            self.error.set_text("The login service is not answering. Try again.")
+        return False
 
     def on_auth_complete(self, greeter):
+        log(f"authentication complete: ok={greeter.get_is_authenticated()}")
+        self.awaiting = False
         if greeter.get_is_authenticated():
             self.phase = "leaving"
             self.leave_t = self.now()

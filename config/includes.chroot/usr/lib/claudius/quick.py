@@ -151,6 +151,7 @@ def clear_notifications():
 
 # ---------------------------------------------------------------------------- UI
 CSS_EXTRA = """
+window.popup-win { background-color: #121830; }
 .quick { background-color: #121830; border: 1px solid #263063; border-radius: 16px; }
 .tile { background-image: none; background-color: #1b2347; color: #e6e9f2; border: none; border-radius: 12px;
         padding: 10px; min-height: 64px; box-shadow: none; text-shadow: none; }
@@ -189,6 +190,7 @@ class Quick(Gtk.Window):
     def __init__(self, notifications_first=False):
         super().__init__(type=Gtk.WindowType.TOPLEVEL)
         self.set_decorated(False)
+        C.styled(self, "popup-win")
         self.set_skip_taskbar_hint(True)
         self.set_keep_above(True)
         self.set_type_hint(Gdk.WindowTypeHint.DIALOG)

@@ -126,7 +126,7 @@
       <property name="tooltip-format" type="string" value="%A %d %B %Y"/>
     </property>
     <property name="plugin-14" type="string" value="actions">
-      <property name="appearance" type="uint" value="0"/>
+      <property name="appearance" type="uint" value="1"/>
       <property name="items" type="array">
         <value type="string" value="+lock-screen"/>
         <value type="string" value="+logout"/>

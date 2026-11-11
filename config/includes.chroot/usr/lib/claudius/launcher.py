@@ -148,6 +148,7 @@ def gicon_image(icon, size):
 
 
 CSS_EXTRA = """
+window.popup-win { background-color: #121830; }
 .launcher { background-color: #121830; border: 1px solid #2a3462; border-radius: 18px; }
 .launcher entry { background-color: transparent; border: none; box-shadow: none; color: #ffffff; font-size: 22px; padding: 10px 6px; }
 .launcher list, .launcher row { background-color: transparent; }
@@ -164,6 +165,7 @@ class Launcher(Gtk.Window):
     def __init__(self):
         super().__init__(type=Gtk.WindowType.TOPLEVEL)
         self.set_decorated(False)
+        C.styled(self, "popup-win")
         self.set_keep_above(True)
         self.set_skip_taskbar_hint(True)
         self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
@@ -229,7 +231,10 @@ class Launcher(Gtk.Window):
                                       lambda v=val: self.copy(v.replace(" ", ""))))
             scored = sorted(((score(a, ql), a) for a in self.apps), key=lambda x: -x[0])
             results += [self.app_result(a) for s, a in scored if s > 0][:6]
+            seen = {r.title.lower() for r in results}
             for title, kw, page in CENTER_PAGES:
+                if title.lower() in seen:
+                    continue
                 if ql in title.lower() or any(w.startswith(ql) for w in kw.split()):
                     results.append(Result(title, "Claudius Center", "preferences-system",
                                           lambda p=page: C.launch(["claudius-center", "--page", p])))
@@ -261,6 +266,7 @@ class Launcher(Gtk.Window):
             self.add_row(Result(os.path.basename(path), path.replace(os.path.expanduser("~"), "~", 1), icon,
                                 lambda p=path: C.launch(["xdg-open", p])))
         self.list.show_all()
+        self.resize(680, 1)
         return False
 
     def show_results(self, results):
@@ -272,6 +278,7 @@ class Launcher(Gtk.Window):
         first = self.list.get_row_at_index(0)
         if first:
             self.list.select_row(first)
+        self.resize(680, 1)
 
     def add_row(self, r):
         row = Gtk.ListBoxRow()
